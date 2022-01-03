@@ -1,4 +1,4 @@
-from differentiable_astar import DifferentiableAstar
+from data_utils.astar.differentiable_astar import DifferentiableAstar
 import torch
 import numpy as np
 import torch.nn as nn
