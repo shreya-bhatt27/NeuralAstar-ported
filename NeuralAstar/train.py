@@ -4,10 +4,12 @@ import sys
 import os
 import numpy as np
 from dataloaders import AstarDataModule
-from newplanner import combine_planner
-from mechanism import Mechanism, NorthEastWestSouth, Moore
-from data import get_hard_medium_easy_masks
-from metrics import compute_mean_metrics
+from data_utils.planner.newplanner import combine_planner
+from data_utils.utils.mechanism import Mechanism, NorthEastWestSouth, Moore
+from data_utils.utils.data import get_hard_medium_easy_masks
+from data_utils.utils.metrics import compute_mean_metrics
+
+# write log callback and check validation loop
 
 class NeuralAstarModule(pl.LightningModule):
 
@@ -115,7 +117,7 @@ class NeuralAstarModule(pl.LightningModule):
                 masks.max(axis=1),
             )
 
-          self.log_values(loss_tot, p_opt, p_suc, p_exp, pred_dist_maps, rel_exps_maps, masks) #write log callback
+          self.log_values(loss_tot, p_opt, p_suc, p_exp, pred_dist_maps, rel_exps_maps, masks)
 
 
   def configure_optimizers(self):
