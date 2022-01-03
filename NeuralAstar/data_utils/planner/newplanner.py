@@ -1,68 +1,44 @@
-from data_utils.astar.differentiable_astar import DifferentiableAstar
+from data_utils.planner.planner import NeuralAstar
 import torch
-import numpy as np
 import torch.nn as nn
-import segmentation_models_pytorch as smp   #install package
+import numpy as np
+from data_utils.utils.data import get_hard_medium_easy_masks
+from data_utils.utils.data import _sample_onehot
 
-class Unet(nn.Module):
-
-    DECODER_CHANNELS = [256, 128, 64, 32, 16]
-
-    def __init__(self, input_dim, encoder_backbone, encoder_depth):
-        super().__init__()
-        decoder_channels = self.DECODER_CHANNELS[:encoder_depth]
-        self.model = smp.Unet(
-            encoder_name=encoder_backbone,
-            encoder_weights=None,
-            classes=1,
-            in_channels=input_dim,
-            encoder_depth=encoder_depth,
-            decoder_channels=decoder_channels,
-        )
-
-    def forward(self, x, map_designs):
-        y = torch.sigmoid(self.model(x))
-        if map_designs is not None:
-            y = y * map_designs + torch.ones_like(y) * (1 - map_designs)
-        return y
-
-class NeuralAstar(nn.Module):
-    def __init__(
-        self,
-        mechanism,
-        encoder_input,
-        encoder_arch,
-        encoder_backbone,
-        encoder_depth,
-        ignore_obstacles,
-        learn_obstacles,
-        g_ratio,
-        Tmax,
-        detach_g,
-    ):
-        super().__init__()
+class combine_planner():
+    def __init__(self,mechanism):
+        self.model = NeuralAstar(mechanism)
         self.mechanism = mechanism
-        self.astar = DifferentiableAstar(
-            mechanism=mechanism,
-            g_ratio=g_ratio,
-            Tmax=Tmax,
-            detach_g=detach_g,
-        )
-        self.encoder_input = encoder_input
-        self.encoder = Unet(len(self.encoder_input), encoder_backbone, encoder_depth)
-        self.ignore_obstacles = ignore_obstacles
-        self.learn_obstacles = learn_obstacles
-
+        self.dilate_gt = 0.5
+    
     def forward(self, map_designs, start_maps, goal_maps):
-        inputs = map_designs
-        if "+" in self.encoder_input:
-            inputs = torch.cat((inputs, start_maps + goal_maps), dim=1)
-        pred_cost_maps = self.encoder(
-            inputs, map_designs if not self.ignore_obstacles else None)
-        obstacles_maps = map_designs if not self.learn_obstacles else torch.ones_like(
-            map_designs)
+        outputs = self.model.forward(map_designs, start_maps, goal_maps)
+        return outputs
 
-        histories, paths = self.astar(pred_cost_maps, start_maps, goal_maps,
-                                      obstacles_maps)
+    def get_opt_trajs(start_maps, goal_maps, opt_policies, mechanism):
 
-        return histories, paths, pred_cost_maps
+        opt_trajs = np.zeros_like(start_maps)
+        opt_policies = opt_policies.transpose((0, 2, 3, 4, 1))
+
+        for i in range(len(opt_trajs)):
+            current_loc = tuple(np.array(np.nonzero(start_maps[i])).squeeze())
+            goal_loc = tuple(np.array(np.nonzero(goal_maps[i])).squeeze())
+
+            while goal_loc != current_loc:
+                opt_trajs[i][current_loc] = 1.0
+                next_loc = mechanism.next_loc(current_loc,
+                                            opt_policies[i][current_loc])
+                assert (
+                    opt_trajs[i][next_loc] == 0.0
+                ), "Revisiting the same position while following the optimal policy"
+                current_loc = next_loc
+
+            opt_trajs[i][current_loc] = 1.0
+
+        return opt_trajs
+
+    def create_start_maps(self, opt_dists):
+        masks = get_hard_medium_easy_masks(opt_dists, reduce_dim=True)
+        masks = np.concatenate(masks, axis=1).max(axis=1, keepdims=True)
+        start_maps = _sample_onehot(masks)
+        return start_maps
