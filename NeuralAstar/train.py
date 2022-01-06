@@ -139,7 +139,7 @@ class NeuralAstarModule(pl.LightningModule):
       return optimizer
 
 
-DataModule = AstarDataModule("/home/shreya/Workspaces/mlrc/planning-datasets/data/mpd/all_064_moore_c16.npz")
+DataModule = AstarDataModule("../../planning-datasets/data/mpd/all_064_moore_c16.npz")
 model = NeuralAstarModule()
 trainer = pl.Trainer()
 trainer.fit(model, DataModule)
