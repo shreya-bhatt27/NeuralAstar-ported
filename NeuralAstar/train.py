@@ -141,5 +141,5 @@ class NeuralAstarModule(pl.LightningModule):
 
 DataModule = AstarDataModule("../../planning-datasets/data/mpd/all_064_moore_c16.npz")
 model = NeuralAstarModule()
-trainer = pl.Trainer()
+trainer = pl.Trainer(gpus=1)
 trainer.fit(model, DataModule)
