@@ -30,28 +30,25 @@ class NeuralAstar(nn.Module):
     def __init__(
         self,
         mechanism,
-        encoder_input,
-        encoder_arch,
-        encoder_backbone,
-        encoder_depth,
-        ignore_obstacles,
-        learn_obstacles,
-        g_ratio,
-        Tmax,
-        detach_g,
     ):
         super().__init__()
         self.mechanism = mechanism
+        self.encoder_input = 'm+'
+        self.encoder_arch = 'Unet'
+        self.encoder_backbone='vgg16_bn'
+        self.encoder_depth = 5
+        self.ignore_obstacles = True
+        self.learn_obstacles = False
+        self.g_ratio = 0.5
+        self.Tmax = 0.25
+        self.detach_g = True
         self.astar = DifferentiableAstar(
-            mechanism=mechanism,
-            g_ratio=g_ratio,
-            Tmax=Tmax,
-            detach_g=detach_g,
+            mechanism=self.mechanism,
+            g_ratio=self.g_ratio,
+            Tmax=self.Tmax,
+            detach_g=self.detach_g,
         )
-        self.encoder_input = encoder_input
-        self.encoder = Unet(len(self.encoder_input), encoder_backbone, encoder_depth)
-        self.ignore_obstacles = ignore_obstacles
-        self.learn_obstacles = learn_obstacles
+        self.encoder = Unet(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
 
     def forward(self, map_designs, start_maps, goal_maps):
         inputs = map_designs
