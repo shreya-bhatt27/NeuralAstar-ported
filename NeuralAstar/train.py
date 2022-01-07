@@ -143,7 +143,6 @@ class NeuralAstarModule(pl.LightningModule):
       optimizer = torch.optim.RMSprop(self.planner.model.parameters(), lr=1e-3)
       return optimizer
 
-
 DataModule = AstarDataModule("../../planning-datasets/data/mpd/bugtrap_forest_032_moore_c8.npz")
 model = NeuralAstarModule()
 trainer = pl.Trainer(gpus=1, num_sanity_val_steps=0, log_every_n_steps=1, max_epochs=15, logger=wandb_logger)
