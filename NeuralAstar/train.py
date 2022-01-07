@@ -144,7 +144,7 @@ class NeuralAstarModule(pl.LightningModule):
       return optimizer
 
 
-DataModule = AstarDataModule("../../planning-datasets/data/mpd/bugtrap_forest_032_moore_c8.npz.npz")
+DataModule = AstarDataModule("../../planning-datasets/data/mpd/bugtrap_forest_032_moore_c8.npz")
 model = NeuralAstarModule()
 trainer = pl.Trainer(gpus=1, num_sanity_val_steps=0, log_every_n_steps=1, max_epochs=15, logger=wandb_logger)
 trainer.fit(model, DataModule)
