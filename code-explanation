@@ -1,0 +1,23 @@
+Step 1
+Data Module creates dataset from npz file obtained from the planning-datasets repository and extracts map_designs, goal_maps, opt_policies, 
+opt_dists from it and provides it to the training loop.
+
+Structure of dataloaders
+There are 3 dataloaders, traindataloader, testdataloader and valdataloader. Each returns a dataset described below.
+Each dataset contains 4 sets described below. num_actions is the number of action that can be taken at any point ( 4 in case of NEWS mechanism and 
+8 in case of Moore). n is the number of sample, here it is the the batch_size.
+1. map_designs : array of size n x size_of_map x size_of_map, and each value represents a point on the map. A 0 value represents traversable area
+and 1 represents presence of an obstacle.
+2. goal_maps : array of size n X size_of_map x size_of_map, and each value represents a point on the map. Only one point will have value 1 and it 
+represents the goal point.
+3. opt_dists : array of size n X size_of_map X size_of_map , and each value represents a point on the map. The value at each point is the astar
+heuristic distance from that point to the goal point from goal_maps.
+4. opt_policies : array of size n x num_actions x size_of_map x size_of_map, and each value represents the boolean value corresponding to an action 
+on a point on a map. The action with corresponding value 1 is the action to be followed at that point to reach the goal following the A* path.
+
+Step 2
+The NeuralAstar Module initiates the training Step
+
+Training Step
+Set the nn module (main neural Astar module) to train.
+The train batch input is extracted from the dataloader. 

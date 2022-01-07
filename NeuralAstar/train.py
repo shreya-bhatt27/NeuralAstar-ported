@@ -82,10 +82,10 @@ class NeuralAstarModule(pl.LightningModule):
           save_file = True
           num_eval_points = 5 if save_file else 2  # save time for validation
           # Compute success and optimality
-          masks = get_hard_medium_easy_masks(opt_dists.numpy(), False,
+          masks = get_hard_medium_easy_masks(opt_dists.cpu().numpy(), False,
                                            num_eval_points)
           masks = np.concatenate(masks, axis=1)
-          pred_dist_maps = np.empty_like(opt_dists)
+          pred_dist_maps = np.empty_like(opt_dists.cpu().numpy())
           pred_dist_maps[:] = np.NAN
           loss_tot = 0.0
           rel_exps_maps = np.empty_like(opt_dists)
