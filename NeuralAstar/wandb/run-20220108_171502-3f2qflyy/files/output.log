@@ -1,0 +1,31 @@
+
+Epoch 0:   0%|                                                                                                                                                                       | 0/9 [00:00<?, ?it/s]
+  | Name      | Type                | Params
+--------------------------------------------------
+0 | model     | NeuralAstar         | 23.8 M
+1 | astar_ref | DifferentiableAstar | 9
+--------------------------------------------------
+23.8 M    Trainable params
+18        Non-trainable params
+23.8 M    Total params
+95.025    Total estimated model params size (MB)
+/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/utilities/distributed.py:69: UserWarning: The dataloader, train dataloader, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 4 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/utilities/distributed.py:69: UserWarning: The dataloader, val dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 4 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+/home/shreya/anaconda3/lib/python3.9/site-packages/torch/functional.py:445: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  ../aten/src/ATen/native/TensorShape.cpp:2157.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+/home/shreya/Workspaces/mlrc/NeuralAstar-ported/NeuralAstar/data_utils/planner/newplanner.py:25: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  current_loc = torch.tensor(torch.nonzero(start_maps[i].squeeze()))
+/home/shreya/Workspaces/mlrc/NeuralAstar-ported/NeuralAstar/data_utils/planner/newplanner.py:26: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+
+
+
+
+
+
+
+Epoch 0:  89%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████               | 8/9 [00:41<00:05,  5.19s/it, loss=0.921, v_num=flyy]
+Validating:   0%|                                                                                                                                                                    | 0/1 [00:00<?, ?it/s]
+/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/utilities/distributed.py:69: UserWarning: Detected KeyboardInterrupt, attempting graceful shutdown...
+  warnings.warn(*args, **kwargs)

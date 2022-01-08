@@ -2,7 +2,6 @@ import torch
 import pytorch_lightning as pl
 import sys
 import os
-import numpy as np
 from dataloaders import AstarDataModule
 from data_utils.planner.newplanner import combine_planner
 from data_utils.utils.mechanism import Mechanism, NorthEastWestSouth, Moore
@@ -43,18 +42,8 @@ class NeuralAstarModule(pl.LightningModule):
       self.planner.model.train()
       map_designs, goal_maps, opt_policies, opt_dists = train_batch
 
-      #map_designs_CPU = map_designs.data.numpy()
-      #goal_maps_CPU = goal_maps.data.numpy()
-      #opt_policies_CPU = opt_policies.data.numpy()
-      #opt_dists_CPU = opt_dists.data.numpy()
-      #map_designs = map_designs.to(self.device)
-      #goal_maps = goal_maps.to(self.device)
-      #opt_policies = opt_policies.to(self.device)
-      #opt_dists = opt_dists.to(self.device)
-
       if map_designs.dim() == 3:
                 map_designs = map_designs.unsqueeze(1)
-                #map_designs_CPU = np.expand_dims(map_designs_CPU, axis=1)
 
       start_maps = self.planner.create_start_maps(opt_dists)
 
@@ -70,35 +59,24 @@ class NeuralAstarModule(pl.LightningModule):
       self.planner.model.eval()
       map_designs, goal_maps, opt_policies, opt_dists = val_batch
 
-      #map_designs_CPU = map_designs.data.numpy()
-      #goal_maps_CPU = goal_maps.data.numpy()
-      #opt_policies_CPU = opt_policies.data.numpy()
-      #opt_dists_CPU = opt_dists.data.numpy()
-      #map_designs = map_designs.to(self.device)
-      #goal_maps = goal_maps.to(self.device)
-      #opt_policies = opt_policies.to(self.device)
-      #opt_dists = opt_dists.to(self.device)
-
       if map_designs.dim() == 3:
                 map_designs = map_designs.unsqueeze(1)
-                #map_designs_CPU = np.expand_dims(map_designs_CPU, axis=1)
+
       wall_dist = torch.min(opt_dists)
       with torch.no_grad():
           save_file = True
           num_eval_points = 5 if save_file else 2  # save time for validation
           # Compute success and optimality
-          masks = get_hard_medium_easy_masks(opt_dists.cpu().numpy(), False,
-                                           num_eval_points)
-          masks = np.concatenate(masks, axis=1)
-          pred_dist_maps = np.empty_like(opt_dists.cpu().numpy())
-          pred_dist_maps[:] = np.NAN
+          masks = get_hard_medium_easy_masks(opt_dists, False, num_eval_points)
+
+          masks = torch.concat(masks, axis=1)
+          pred_dist_maps = torch.empty_like(opt_dists)
+          pred_dist_maps[:] = torch.nan 
           loss_tot = 0.0
-          rel_exps_maps = np.empty_like(opt_dists.cpu().numpy())
-          rel_exps_maps[:] = np.NAN
+          rel_exps_maps = torch.empty_like(opt_dists)
+          rel_exps_maps[:] = torch.nan
           for i in range(masks.shape[1]):
               start_maps = masks[:, i]
-              start_maps = torch.from_numpy(start_maps)
-              start_maps = start_maps.cuda()
               x = map_designs, start_maps, goal_maps
               outputs = self.forward(x)
               opt_trajs = self.planner.get_opt_trajs(start_maps, goal_maps, opt_policies, self.mechanism)
@@ -112,14 +90,13 @@ class NeuralAstarModule(pl.LightningModule):
                                                 dim=(1, 2, 3)) == 0
               arrived = arrived * not_passed_through_obstacles
               pred_dists = pred_dists * arrived + wall_dist * (1.0 - arrived)
-              pred_dists = pred_dists.cpu().data.numpy()
 
             # relative number of expansions
-              pred_exps = outputs[0].cpu().data.numpy().sum((1, 2, 3))
+              pred_exps = outputs[0].sum((1, 2, 3))
               if (self.model.training & self.skip_exp_when_training) is not True:
                   astar_outputs = self.astar_ref(map_designs, start_maps,
                                                  goal_maps, map_designs)
-                  exps = astar_outputs[0].cpu().data.numpy().sum((1, 2, 3))
+                  exps = astar_outputs[0].sum((1, 2, 3))
               else:
                   exps = pred_exps
               rel_exps = pred_exps / exps
@@ -132,10 +109,10 @@ class NeuralAstarModule(pl.LightningModule):
           loss_tot /= masks.shape[1]
 
           p_opt, p_suc, p_exp = compute_mean_metrics(
-                torch.from_numpy(pred_dist_maps).cuda(),
-                torch.from_numpy(rel_exps_maps).cuda(),
+                pred_dist_maps,
+                rel_exps_maps,
                 opt_dists,
-                (torch.from_numpy(masks.max(axis=1)).cuda()),
+                masks.max(axis=1),
             )
 
           self.log("p_opt", p_opt, prog_bar=True, logger=True)

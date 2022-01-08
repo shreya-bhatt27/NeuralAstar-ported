@@ -1,5 +1,4 @@
 import torch
-import numpy as np
 import torch.nn as nn
 from data_utils.utils.mechanism import Mechanism
 from data_utils.utils._il_utils import backtrack, _st_softmax_noexp, expand

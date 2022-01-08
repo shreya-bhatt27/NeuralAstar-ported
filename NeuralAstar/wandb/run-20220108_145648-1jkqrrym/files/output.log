@@ -1,0 +1,73 @@
+
+Epoch 0:   0%|                                                                                                                                                                       | 0/9 [00:00<?, ?it/s]
+  | Name      | Type                | Params
+--------------------------------------------------
+0 | model     | NeuralAstar         | 23.8 M
+1 | astar_ref | DifferentiableAstar | 9
+--------------------------------------------------
+23.8 M    Trainable params
+18        Non-trainable params
+23.8 M    Total params
+95.025    Total estimated model params size (MB)
+/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/utilities/distributed.py:69: UserWarning: The dataloader, train dataloader, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 4 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/utilities/distributed.py:69: UserWarning: The dataloader, val dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 4 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+Traceback (most recent call last):
+  File "/home/shreya/Workspaces/mlrc/NeuralAstar-ported/NeuralAstar/train.py", line 151, in <module>
+    trainer.fit(model, DataModule)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 458, in fit
+    self._run(model)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 756, in _run
+    self.dispatch()
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 797, in dispatch
+    self.accelerator.start_training(self)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/accelerators/accelerator.py", line 96, in start_training
+    self.training_type_plugin.start_training(trainer)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 144, in start_training
+    self._results = trainer.run_stage()
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 807, in run_stage
+    return self.run_train()
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py", line 869, in run_train
+    self.train_loop.run_training_epoch()
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/training_loop.py", line 490, in run_training_epoch
+    batch_output = self.run_training_batch(batch, batch_idx, dataloader_idx)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/training_loop.py", line 731, in run_training_batch
+    self.optimizer_step(optimizer, opt_idx, batch_idx, train_step_and_backward_closure)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/training_loop.py", line 424, in optimizer_step
+    model_ref.optimizer_step(
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/core/lightning.py", line 1403, in optimizer_step
+    optimizer.step(closure=optimizer_closure)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/core/optimizer.py", line 214, in step
+    self.__optimizer_step(*args, closure=closure, profiler_name=profiler_name, **kwargs)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/core/optimizer.py", line 134, in __optimizer_step
+    trainer.accelerator.optimizer_step(optimizer, self._optimizer_idx, lambda_closure=closure, **kwargs)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/accelerators/accelerator.py", line 329, in optimizer_step
+    self.run_optimizer_step(optimizer, opt_idx, lambda_closure, **kwargs)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/accelerators/accelerator.py", line 336, in run_optimizer_step
+    self.training_type_plugin.optimizer_step(optimizer, lambda_closure=lambda_closure, **kwargs)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 193, in optimizer_step
+    optimizer.step(closure=lambda_closure, **kwargs)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/torch/optim/optimizer.py", line 88, in wrapper
+    return func(*args, **kwargs)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/torch/autograd/grad_mode.py", line 28, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/torch/optim/rmsprop.py", line 96, in step
+    loss = closure()
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/training_loop.py", line 725, in train_step_and_backward_closure
+    result = self.training_step_and_backward(
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/training_loop.py", line 814, in training_step_and_backward
+    result = self.training_step(split_batch, batch_idx, opt_idx, hiddens)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/trainer/training_loop.py", line 280, in training_step
+    training_step_output = self.trainer.accelerator.training_step(args)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/accelerators/accelerator.py", line 204, in training_step
+    return self.training_type_plugin.training_step(*args)
+  File "/home/shreya/anaconda3/lib/python3.9/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 155, in training_step
+    return self.lightning_module.training_step(*args, **kwargs)
+  File "/home/shreya/Workspaces/mlrc/NeuralAstar-ported/NeuralAstar/train.py", line 59, in training_step
+    start_maps = self.planner.create_start_maps(opt_dists)
+  File "/home/shreya/Workspaces/mlrc/NeuralAstar-ported/NeuralAstar/data_utils/planner/newplanner.py", line 44, in create_start_maps
+    masks = get_hard_medium_easy_masks(opt_dists.cpu().numpy(), reduce_dim=True)
+  File "/home/shreya/Workspaces/mlrc/NeuralAstar-ported/NeuralAstar/data_utils/utils/data.py", line 37, in get_hard_medium_easy_masks
+    torch.random.seed(TEST_RANDOM_SEED)
+TypeError: seed() takes 0 positional arguments but 1 was given

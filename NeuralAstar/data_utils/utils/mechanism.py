@@ -4,7 +4,6 @@ Most of this script has been copied from https://github.com/RLAgent/gated-path-p
 
 from __future__ import print_function
 import abc
-import numpy as np
 import torch
 
 
@@ -27,8 +26,8 @@ class Mechanism(abc.ABC):
         self.action_to_move = action_to_move
 
     def next_loc(self, current_loc, one_hot_action):
-        move = self.action_to_move[np.argmax(one_hot_action)]
-        return tuple(np.add(current_loc, move))
+        move = self.action_to_move[torch.argmax(one_hot_action)]
+        return tuple(torch.add(current_loc, move))
 
     @abc.abstractmethod
     def neighbors_func(self, maze, p_orient, p_y, p_x):
