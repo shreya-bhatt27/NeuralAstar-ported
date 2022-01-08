@@ -6,6 +6,7 @@ import torch.utils.data as data
 
 class MazeDataset(data.Dataset):
   def __init__(self, filename: str, dataset_type: str):
+    super().__init__()
     assert filename.endswith("npz")  # Must be .npz format
     self.filename = filename
     self.dataset_type = dataset_type  # train, valid, test
@@ -44,14 +45,16 @@ class AstarDataModule(pl.LightningDataModule):
   def __init__(self, datafile):
     super().__init__()
     self.datafile = datafile
-  def setup(self):        
+  def setup(self, stage):        
     self.train_dataset = MazeDataset(self.datafile, "train")
     self.val_dataset = MazeDataset(self.datafile, "valid")
     self.test_dataset = MazeDataset(self.datafile, "test")
   def train_dataloader(self):
-    self.setup()
-    return torch.utils.data.DataLoader(self.train_dataset, batch_size=100, shuffle=True, num_workers=0)
+    self.setup('train')
+    return torch.utils.data.DataLoader(self.train_dataset, batch_size=100, shuffle=True, num_workers=4)
   def val_dataloader(self):
-    return torch.utils.data.DataLoader(self.val_dataset, batch_size=100, shuffle=False, num_workers=0)
+    self.setup('valid')
+    return torch.utils.data.DataLoader(self.val_dataset, batch_size=100, shuffle=False, num_workers=4)
   def test_dataloader(self):
-    return torch.utils.data.DataLoader(self.test_dataset, batch_size=100, shuffle=False, num_workers=0)
+    self.setup('test')
+    return torch.utils.data.DataLoader(self.test_dataset, batch_size=100, shuffle=False, num_workers=4)

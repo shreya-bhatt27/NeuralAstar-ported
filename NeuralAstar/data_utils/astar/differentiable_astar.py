@@ -79,7 +79,7 @@ class DifferentiableAstar(nn.Module):
 
             histories = histories + selected_node_maps
             histories = torch.clamp(histories, 0, 1)
-            open_maps = open_maps - is_unsolved * selected_node_maps
+            open_maps = open_maps.float() - is_unsolved * selected_node_maps.float()
             open_maps = torch.clamp(open_maps, 0, 1)
 
             # open neighboring nodes, add them to the openlist if they satisfy certain requirements
