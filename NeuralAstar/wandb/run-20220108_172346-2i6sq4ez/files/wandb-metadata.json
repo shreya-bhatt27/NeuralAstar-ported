@@ -1,0 +1,22 @@
+{
+    "os": "Linux-5.11.0-44-generic-x86_64-with-glibc2.31",
+    "python": "3.9.7",
+    "heartbeatAt": "2022-01-08T11:53:49.283309",
+    "startedAt": "2022-01-08T11:53:46.902246",
+    "docker": null,
+    "cpu_count": 4,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/shreya/Workspaces/mlrc/NeuralAstar-ported/NeuralAstar/train.py",
+    "codePath": "NeuralAstar/train.py",
+    "git": {
+        "remote": "https://github.com/shreya-bhatt27/NeuralAstar-ported.git",
+        "commit": "c54802c0e2b803acebf2fc74771b397ff0b9d1da"
+    },
+    "email": "emailtoshreya@gmail.com",
+    "root": "/home/shreya/Workspaces/mlrc/NeuralAstar-ported",
+    "host": "shreya-THINKPAD-L450",
+    "username": "shreya",
+    "executable": "/home/shreya/anaconda3/bin/python"
+}
