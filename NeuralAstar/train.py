@@ -10,7 +10,12 @@ from data_utils.utils.data import get_hard_medium_easy_masks
 from data_utils.utils.metrics import compute_mean_metrics
 from data_utils.utils._il_utils import dilate_opt_trajs
 
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning import Trainer
 # write log callback and check validation loop
+
+wandb_logger = WandbLogger(project="Neural-astar-2")
+
 
 class NeuralAstarModule(pl.LightningModule):
 
