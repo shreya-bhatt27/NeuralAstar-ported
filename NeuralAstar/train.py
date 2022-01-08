@@ -132,10 +132,10 @@ class NeuralAstarModule(pl.LightningModule):
           loss_tot /= masks.shape[1]
 
           p_opt, p_suc, p_exp = compute_mean_metrics(
-                pred_dist_maps.cuda(),
-                rel_exps_maps.cuda(),
+                torch.from_numpy(pred_dist_maps).cuda(),
+                torch.from_numpy(rel_exps_maps).cuda(),
                 opt_dists,
-                masks.max(axis=1).cuda(),
+                (torch.from_numpy(masks.max(axis=1)).cuda()),
             )
 
           self.log("p_opt", p_opt, prog_bar=True, logger=True)
@@ -150,5 +150,5 @@ class NeuralAstarModule(pl.LightningModule):
 
 DataModule = AstarDataModule("../../planning-datasets/data/mpd/bugtrap_forest_032_moore_c8.npz")
 model = NeuralAstarModule()
-trainer = pl.Trainer(gpus=1, num_sanity_val_steps=0, log_every_n_steps=1, max_epochs=15, logger=wandb_logger)
+trainer = pl.Trainer(gpus=0, num_sanity_val_steps=0, log_every_n_steps=1, max_epochs=15, logger=wandb_logger)
 trainer.fit(model, DataModule)
