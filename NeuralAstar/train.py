@@ -130,7 +130,7 @@ class NeuralAstarModule(pl.LightningModule):
                 pred_dist_maps.cuda(),
                 rel_exps_maps.cuda(),
                 opt_dists,
-                masks.max(axis=1.cuda()),
+                masks.max(axis=1).cuda(),
             )
 
           self.log("p_opt", p_opt, prog_bar=True, logger=True)
