@@ -31,6 +31,7 @@ def get_opt_trajs(start_maps, goal_maps,
 
 
 def get_hard_medium_easy_masks(opt_dists,
+                               device,
                                reduce_dim: bool = True,
                                num_points_per_map: int = 5):
     # make sure the selected nodes are random but fixed
@@ -42,9 +43,7 @@ def get_hard_medium_easy_masks(opt_dists,
     od_nan = od_vct.clone()
     od_nan[od_nan == wall_dist] = torch.nan
     (od_min, indices) = torch.min(od_nan, axis=1, keepdims=True)
-    tens_mult = torch.tensor([[1.0, 0.85, 0.70, 0.55]])
-    new_tens_mult = tens_mult.type_as(tens_mult.type)
-    thes = od_min.matmul()
+    thes = od_min.matmul(torch.tensor([[1.0, 0.85, 0.70, 0.55]]))
     thes = thes.int()
     thes = torch.transpose(thes, 0, 1)
     thes = thes.reshape(4, n_samples, 1, 1, 1)
@@ -54,7 +53,7 @@ def get_hard_medium_easy_masks(opt_dists,
         binmaps = ((thes[i] <= opt_dists) &
                    (opt_dists < thes[i + 1])) * 1.0
         binmaps = torch.repeat_interleave(binmaps, num_points_per_map, 0)
-        masks = _sample_onehot(binmaps)
+        masks = _sample_onehot(binmaps, device)
         masks = masks.reshape(n_samples, num_points_per_map,
                               *opt_dists.shape[1:])
         if reduce_dim:
@@ -63,9 +62,9 @@ def get_hard_medium_easy_masks(opt_dists,
     return masks_list
 
 
-def _sample_onehot(binmaps):
+def _sample_onehot(binmaps, device):
     n_samples = len(binmaps)
-    binmaps_n = binmaps * torch.rand(binmaps.shape, device = self.device)
+    binmaps_n = binmaps * torch.rand(binmaps.shape, device= device)
 
     binmaps_vct = binmaps_n.reshape(n_samples, -1)
     ind = binmaps_vct.argmax(axis=-1)

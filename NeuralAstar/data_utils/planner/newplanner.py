@@ -37,8 +37,8 @@ class combine_planner():
             opt_trajs[i][current_loc] = 1.0
         return opt_trajs
 
-    def create_start_maps(self, opt_dists):
-        masks = get_hard_medium_easy_masks(opt_dists, reduce_dim=True)
+    def create_start_maps(self, opt_dists, device):
+        masks = get_hard_medium_easy_masks(opt_dists, device, reduce_dim=True)
         (masks, indices) = torch.concat(masks, axis=1).max(axis=1, keepdims=True)
-        start_maps = _sample_onehot(masks)
+        start_maps = _sample_onehot(masks, device)
         return start_maps

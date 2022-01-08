@@ -45,7 +45,7 @@ class NeuralAstarModule(pl.LightningModule):
       if map_designs.dim() == 3:
                 map_designs = map_designs.unsqueeze(1)
 
-      start_maps = self.planner.create_start_maps(opt_dists)
+      start_maps = self.planner.create_start_maps(opt_dists, self.device)
 
       x = (map_designs, start_maps, goal_maps)
       outputs = self.forward(x)
@@ -67,7 +67,7 @@ class NeuralAstarModule(pl.LightningModule):
           save_file = True
           num_eval_points = 5 if save_file else 2  # save time for validation
           # Compute success and optimality
-          masks = get_hard_medium_easy_masks(opt_dists, False, num_eval_points)
+          masks = get_hard_medium_easy_masks(opt_dists, self.device, False, num_eval_points)
 
           masks = torch.concat(masks, axis=1)
           pred_dist_maps = torch.empty_like(opt_dists)
@@ -107,18 +107,20 @@ class NeuralAstarModule(pl.LightningModule):
               pred_dist_maps[masks[:, i]] = pred_dists[:]
               rel_exps_maps[masks[:, i]] = rel_exps[:]
           loss_tot /= masks.shape[1]
+          (masks, indices) = masks.max(axis=1)
 
           p_opt, p_suc, p_exp = compute_mean_metrics(
                 pred_dist_maps,
                 rel_exps_maps,
                 opt_dists,
-                masks.max(axis=1),
+                masks,
             )
 
           self.log("p_opt", p_opt, prog_bar=True, logger=True)
           self.log("p_suc", p_suc, prog_bar=True, logger=True)
           self.log("p_exp", p_exp, prog_bar=True, logger=True)
-          self.log("loss" , loss_tot, prog_bar=True, logger=True)
+          self.log("loss_tot" , loss_tot, prog_bar=True, logger=True)
+          self.log("loss" , loss, logger=True)
 
   def configure_optimizers(self):
       optimizer = torch.optim.RMSprop(self.planner.model.parameters(), lr=1e-3)
@@ -127,5 +129,5 @@ class NeuralAstarModule(pl.LightningModule):
 
 DataModule = AstarDataModule("../../planning-datasets/data/mpd/bugtrap_forest_032_moore_c8.npz")
 model = NeuralAstarModule()
-trainer = pl.Trainer(gpus=1, log_every_n_steps=1, max_epochs=15, logger=wandb_logger)
+trainer = pl.Trainer(log_every_n_steps=1, max_epochs=15, logger=wandb_logger)
 trainer.fit(model, DataModule)
