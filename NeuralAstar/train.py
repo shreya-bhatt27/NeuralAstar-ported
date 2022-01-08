@@ -88,11 +88,12 @@ class NeuralAstarModule(pl.LightningModule):
           pred_dist_maps = np.empty_like(opt_dists.cpu().numpy())
           pred_dist_maps[:] = np.NAN
           loss_tot = 0.0
-          rel_exps_maps = np.empty_like(opt_dists)
+          rel_exps_maps = np.empty_like(opt_dists.cpu().numpy())
           rel_exps_maps[:] = np.NAN
           for i in range(masks.shape[1]):
               start_maps = masks[:, i]
               start_maps = torch.from_numpy(start_maps)
+              start_maps = start_maps.cuda()
               x = map_designs, start_maps, goal_maps
               outputs = self.forward(x)
               opt_trajs = self.planner.get_opt_trajs(start_maps, goal_maps, opt_policies, self.mechanism)
@@ -126,20 +127,23 @@ class NeuralAstarModule(pl.LightningModule):
           loss_tot /= masks.shape[1]
 
           p_opt, p_suc, p_exp = compute_mean_metrics(
-                pred_dist_maps,
-                rel_exps_maps,
+                pred_dist_maps.cuda(),
+                rel_exps_maps.cuda(),
                 opt_dists,
-                masks.max(axis=1),
+                masks.max(axis=1.cuda()),
             )
 
-          self.log_values(loss_tot, p_opt, p_suc, p_exp, pred_dist_maps, rel_exps_maps, masks)
+          self.log("p_opt", p_opt, prog_bar=True, logger=True)
+          self.log("p_suc", p_suc, prog_bar=True, logger=True)
+          self.log("p_exp", p_exp, prog_bar=True, logger=True)
+          self.log("loss" , loss_tot, prog_bar=True, logger=True)
 
   def configure_optimizers(self):
       optimizer = torch.optim.RMSprop(self.planner.model.parameters(), lr=1e-3)
       return optimizer
 
 
-DataModule = AstarDataModule("../../planning-datasets/data/mpd/bugtrap_forest_032_moore_c8.npz.npz")
+DataModule = AstarDataModule("../../planning-datasets/data/mpd/bugtrap_forest_032_moore_c8.npz")
 model = NeuralAstarModule()
 trainer = pl.Trainer(gpus=1, num_sanity_val_steps=0, log_every_n_steps=1, max_epochs=15, logger=wandb_logger)
 trainer.fit(model, DataModule)
