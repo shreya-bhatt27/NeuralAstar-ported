@@ -2,6 +2,7 @@ import torch
 import pytorch_lightning as pl
 import sys
 import os
+import wandb
 import numpy as np
 from torch.utils.data import random_split, DataLoader
 import torch.utils.data as data
@@ -127,6 +128,8 @@ class NeuralAstarModule(pl.LightningModule):
           self.log("p_exp", p_exp, prog_bar=True, logger=True)
           self.log("loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("loss" , loss, logger=True)
+          trainer.save_checkpoint("recent.pth")
+          wandb.save("recent.pth"
             
   def test_step(self, test_batch, batch_idx):
       self.planner.model.eval()
