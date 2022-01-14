@@ -1,4 +1,3 @@
-!pip install pytorch_lightning==1.3
 import pytorch_lightning as pl
 from torch.utils.data import random_split, DataLoader
 import numpy as np
