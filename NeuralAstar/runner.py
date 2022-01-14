@@ -15,8 +15,7 @@ from data_utils.utils.metrics import compute_mean_metrics
 from data_utils.planner.bbastar import BBAstarPlanner
 from dataloaders import AstarDataModule
 
-logger = WandbLogger(project="Neural-astar-cc-tl")
-     
+    
 class NeuralAstarModule(pl.LightningModule):
 
   def __init__(self):
@@ -379,8 +378,4 @@ class BBAstarModule(pl.LightningModule):
       optimizer = torch.optim.RMSprop(self.planner.model.parameters(), lr=1e-3)
       return optimizer
 
-DataModule = AstarDataModule("dataset_astar/data/mpd/bugtrap_forest_032_moore_c8.npz")
-model = BBAstarModule()
-trainer = pl.Trainer(gpus=1, log_every_n_steps=1, max_epochs=100,logger=logger,num_sanity_val_steps=0,gradient_clip_val=40,weights_summary="full" )
-trainer.fit(model, DataModule)
-trainer.test(model, DataModule.test_dataloader())
+
