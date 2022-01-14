@@ -1,8 +1,7 @@
-from newplanner import Unet
+from data_utils.planner.newplanner import Unet, combine_planner
 import torch
 import torch.nn as nn
 from data_utils.astar.differentiable_astar import DifferentiableAstar
-from newplanner import combine_planner
 
 class BBAstarFunc(torch.autograd.Function):
     """
