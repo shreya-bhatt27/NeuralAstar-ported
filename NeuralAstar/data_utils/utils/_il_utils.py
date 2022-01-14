@@ -7,7 +7,7 @@ from __future__ import print_function
 TEST_RANDOM_SEED = 2020
 NUM_POINTS_PER_MAP = 5
 
-​​def _st_softmax_noexp(val):
+def _st_softmax_noexp(val):
     val_ = val.reshape(val.shape[0], -1)
     y = val_ / (val_.sum(dim=-1, keepdim=True))
     _, ind = y.max(dim=-1)
@@ -72,32 +72,19 @@ def get_hard_medium_easy_masks(opt_dists,
                                device,
                                reduce_dim: bool = True,
                                num_points_per_map: int = 5):
-    # make sure the selected nodes are random but fixed
-    #torch.random.seed()
-    # impossible distance
     wall_dist = torch.min(opt_dists)
-    #print("wall dist:", wall_dist)
     n_samples = opt_dists.shape[0]
-    #print("n_samples:", n_samples)
     od_vct = opt_dists.reshape(n_samples, -1)
-    #print("od_vct_size:",od_vct.size())
     od_nan = od_vct.clone()
     od_nan[od_nan == wall_dist] = float('nan')
     od_nan = torch.nan_to_num(od_nan)
     (od_min, indices) = torch.min(od_nan, axis=1, keepdims=True)
-    #print("od_min:", od_min)
-    #print("od_min_size:", od_min.size())
     thes = od_min.matmul(torch.tensor([[1.0, 0.85, 0.70, 0.55]], device=device))
-    #print("thes_shape:", thes.size())
     thes = thes.int()
-    #print("thes_shape:", thes.size())
     thes = torch.transpose(thes, 0, 1)
-    #print("thes_shape:", thes.size())
     thes = thes.reshape(4, n_samples, 1, 1, 1)
-    #print("thes_shape:", thes.size())
-​
     masks_list = []
-    #print("thes:", thes)
+
     for i in range(3):
         binmaps = ((thes[i] <= opt_dists) &
                    (opt_dists < thes[i + 1])) * 1.0
@@ -109,17 +96,15 @@ def get_hard_medium_easy_masks(opt_dists,
             (masks, indices) = masks.max(axis=1)
         masks_list.append(masks.bool())
     return masks_list
-​
-​
+
 def _sample_onehot(binmaps, device):
     n_samples = len(binmaps)
     binmaps_n = binmaps * torch.rand(binmaps.shape, device= device)
-​
+    
     binmaps_vct = binmaps_n.reshape(n_samples, -1)
     ind = binmaps_vct.argmax(axis=-1)
     onehots = torch.zeros_like(binmaps_vct)
     onehots[range(n_samples), ind] = 1
     onehots = onehots.reshape(binmaps_n.shape)
     onehots = onehots.bool()
-​
     return onehots
