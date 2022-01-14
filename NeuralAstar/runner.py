@@ -128,8 +128,8 @@ class NeuralAstarModule(pl.LightningModule):
           self.log("p_exp", p_exp, prog_bar=True, logger=True)
           self.log("loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("loss" , loss, logger=True)
-          trainer.save_checkpoint("recent_astar.pth")
-          wandb.save("recent_astar.pth")
+          #trainer.save_checkpoint("recent_astar.pth")
+          #wandb.save("recent_astar.pth")
             
   def test_step(self, test_batch, batch_idx):
       self.planner.model.eval()
@@ -309,8 +309,8 @@ class BBAstarModule(pl.LightningModule):
           self.log("p_exp", p_exp, prog_bar=True, logger=True)
           self.log("loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("loss" , loss, logger=True)
-          trainer.save_checkpoint("recent_bbastar.pth")
-          wandb.save("recent_bbastar.pth")
+          #trainer.save_checkpoint("recent_bbastar.pth")
+          #wandb.save("recent_bbastar.pth")
             
   def test_step(self, test_batch, batch_idx):
       self.planner.model.eval()
