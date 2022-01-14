@@ -1,9 +1,9 @@
+from __future__ import print_function
 import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
-from __future__ import print_function
 TEST_RANDOM_SEED = 2020
 NUM_POINTS_PER_MAP = 5
 
