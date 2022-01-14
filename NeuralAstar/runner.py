@@ -197,6 +197,10 @@ class NeuralAstarModule(pl.LightningModule):
           self.log("test_p_exp", p_exp, prog_bar=True, logger=True)
           self.log("test_loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("test_loss" , loss, logger=True)
+            
+  def configure_optimizers(self):
+      optimizer = torch.optim.RMSprop(self.planner.model.parameters(), lr=1e-3)
+      return optimizer
 
 class BBAstarModule(pl.LightningModule):
 
