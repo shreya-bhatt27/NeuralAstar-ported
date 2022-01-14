@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./NeuralAstar/third_party/segmentation_models_pytorch"
+    ]
+}
