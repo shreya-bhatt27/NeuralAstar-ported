@@ -1,14 +1,8 @@
 import torch
-import numpy as np
 import torch.nn as nn
-from data_utils.utils.mechanism import Mechanism
-from data_utils.utils._il_utils import backtrack, _st_softmax_noexp, expand
 import math
-
+from data_utils.utils._il_utils import _st_softmax_noexp, backtrack, expand
 class DifferentiableAstar(nn.Module):
-    """
-    Implementation based on https://rosettacode.org/wiki/A*_search_algorithm
-    """
     def __init__(self, 
                  mechanism,
                  g_ratio,
