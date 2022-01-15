@@ -121,12 +121,14 @@ class BBAstarModule(pl.LightningModule):
                 opt_dists,
                 masks,
             )
+          hmean = (2*p_opt*p_exp)/(p_opt+p_exp)
 
           self.log("p_opt", p_opt, prog_bar=True, logger=True)
           self.log("p_suc", p_suc, prog_bar=True, logger=True)
           self.log("p_exp", p_exp, prog_bar=True, logger=True)
           self.log("loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("loss" , loss, logger=True)
+          self.log("hmean", hmean, logger=True, prog_bar=True)
           #trainer.save_checkpoint("recent_bbastar.pth")
           #wandb.save("recent_bbastar.pth")
             
