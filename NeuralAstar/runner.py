@@ -309,6 +309,7 @@ class NeuralAstarModule(pl.LightningModule):
                 opt_dists,
                 masks,
             )
+          hmean = (2*p_opt*p_exp)/(p_opt+p_exp)
 
           self.log("p_opt", p_opt, prog_bar=True, logger=True)
           self.log("p_suc", p_suc, prog_bar=True, logger=True)
@@ -316,6 +317,7 @@ class NeuralAstarModule(pl.LightningModule):
           self.log("loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("loss" , loss, logger=True)
           #trainer.save_checkpoint("recent_bbastar.pth")
+          self.log("hmean" , hmean, prog_bar=True, logger=True)
           #wandb.save("recent_bbastar.pth")
             
   def test_step(self, test_batch, batch_idx):
