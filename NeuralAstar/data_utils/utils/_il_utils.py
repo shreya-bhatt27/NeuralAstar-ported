@@ -121,7 +121,7 @@ def compute_bsmean_cbound(pred_dists, rel_exps, opt_dists, masks):
                                 opt_dists[i:i + 1], masks[i:i + 1])
         if (len(o1) > 0):
             opt1.append(o1.float().mean().cpu())
-            exp.append(np.maximum(1 - e, 0).float().mean().cpu())
+            exp.append(np.maximum(1 - e.float().cpu(), 0).mean())
     opt1 = np.array(opt1)
     exp = np.array(exp)
     opt1_bounds = bs.bootstrap(
