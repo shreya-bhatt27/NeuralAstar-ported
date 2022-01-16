@@ -400,7 +400,7 @@ class NeuralAstarModule(pl.LightningModule):
           print("pred_dist_maps_size", pred_dist_maps.size())
           print("opt_traj_size", opt_trajs.size())
                     
-          score = compute_bsmean_cbound(pred_dist_maps, rel_exps_maps, opt_dists, masks)
+          score = compute_bsmean_cbound(pred_dist_maps.float(), rel_exps_maps.float(), opt_dists.float(), masks.float())
           p_opt_bsm = score[0][0]
           p_opt_lci = score[0][1]
           p_opt_uci = score[0][2]
