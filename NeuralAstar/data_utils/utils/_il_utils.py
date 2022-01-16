@@ -117,7 +117,7 @@ def compute_bsmean_cbound(pred_dists, rel_exps, opt_dists, masks):
 
     opt1, exp = [], []
     for i in range(len(pred_dists)):
-        o1, e = compute_opt_exp(pred_dists[i:i + 1], rel_exps[i:i + 1],
+        o1, s, e = compute_opt_suc_exp(pred_dists[i:i + 1], rel_exps[i:i + 1],
                                 opt_dists[i:i + 1], masks[i:i + 1])
         if (len(o1) > 0):
             opt1.append(o1.mean())
