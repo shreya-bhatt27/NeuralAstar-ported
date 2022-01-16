@@ -99,6 +99,7 @@ def get_hard_medium_easy_masks(opt_dists,
 
 def _sample_onehot(binmaps, device):
     n_samples = len(binmaps)
+    torch.manual_seed(1993)
     binmaps_n = binmaps * torch.rand(binmaps.shape, device= device)
     
     binmaps_vct = binmaps_n.reshape(n_samples, -1)
