@@ -401,7 +401,7 @@ class NeuralAstarModule(pl.LightningModule):
           #print("pred_dist_maps_size", pred_dist_maps.size())
           path_len = pred_dist_maps.sum(dim=(1, 2, 3))
           path_len_opt = opt_trajs.sum(dim=(1,2,3))
-          path_opt_ratio = path_len_opt/path_len
+          path_opt_ratio = torch.div(path_len_opt,path_len)
           path_opt_ratio = path_opt_ratio.mean()
           #print("opt_traj_size", opt_trajs.size())
                     
