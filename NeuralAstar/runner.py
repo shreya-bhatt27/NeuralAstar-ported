@@ -11,7 +11,7 @@ from pytorch_lightning import Trainer
 import matplotlib.pyplot as plt
 from data_utils.utils.mechanism import Moore , NorthEastWestSouth
 from data_utils.planner.newplanner import combine_planner
-from data_utils.utils._il_utils import dilate_opt_trajs, get_hard_medium_easy_masks
+from data_utils.utils._il_utils import dilate_opt_trajs, get_hard_medium_easy_masks, compute_bsmean_cbound
 from data_utils.utils.metrics import compute_mean_metrics
 from data_utils.planner.bbastar import BBAstarPlanner
 from dataloaders import AstarDataModule
@@ -55,7 +55,7 @@ class BBAstarModule(pl.LightningModule):
       outputs = self.forward(x)
       opt_trajs = self.planner.get_opt_trajs(start_maps, goal_maps, opt_policies, self.mechanism, self.device)
       opt_trajs_ = dilate_opt_trajs(opt_trajs.double(), map_designs.double(), self.mechanism)
-      self.show_maze(outputs[2][2][0])   
+      #self.show_maze(outputs[2][2][0])   
       loss = self.loss_fn(outputs[0], opt_trajs)
       self.log("train_loss", loss, prog_bar=True, logger=True)
       return loss
@@ -206,14 +206,19 @@ class BBAstarModule(pl.LightningModule):
 
 class NeuralAstarModule(pl.LightningModule):
 
-  def __init__(self):
+  def __init__(self, g_ratio, encoder_backbone, dilate_gt , encoder_input):
       super().__init__()
       self.mechanism = Moore()
-      self.planner = combine_planner(self.mechanism)
+      self.g_ratio = g_ratio
+      self.encoder_input = encoder_input
+      self.encoder_backbone = encoder_backbone
+      self.dilate_gt = dilate_gt
+      self.planner = combine_planner(self.mechanism, self.g_ratio, self.encoder_backbone, self.dilate_gt, self.encoder_input)
       self.model = self.planner.model
       self.skip_exp_when_training = False
       self.astar_ref = self.planner.astar_ref
       self.output_exp_instead_of_rel_exp = False
+
 
   def show_maze(self, image):
       image = image.cpu().detach().numpy().squeeze()
@@ -242,7 +247,10 @@ class NeuralAstarModule(pl.LightningModule):
       x = (map_designs, start_maps, goal_maps)
       outputs = self.forward(x)
       opt_trajs = self.planner.get_opt_trajs(start_maps, goal_maps, opt_policies, self.mechanism, self.device)
-      opt_trajs_ = dilate_opt_trajs(opt_trajs.double(), map_designs.double(), self.mechanism)
+      if self.dilate_gt:
+          opt_trajs_ = dilate_opt_trajs(opt_trajs.double(), map_designs.double(), self.mechanism)
+      else:
+          opt_trajs = opt_trajs
       self.show_maze(outputs[2][2][0])   
       loss = self.loss_fn(outputs[0], opt_trajs)
       self.log("train_loss", loss, prog_bar=True, logger=True)
@@ -274,7 +282,10 @@ class NeuralAstarModule(pl.LightningModule):
               x = map_designs, start_maps, goal_maps
               outputs = self.forward(x)
               opt_trajs = self.planner.get_opt_trajs(start_maps, goal_maps, opt_policies, self.mechanism, self.device)
-              opt_trajs_ = dilate_opt_trajs(opt_trajs.double(), map_designs.double(), self.mechanism)
+              if self.dilate_gt:
+                  opt_trajs_ = dilate_opt_trajs(opt_trajs.double(), map_designs.double(), self.mechanism)
+              else:
+                  opt_trajs = opt_trajs
               loss = self.loss_fn(outputs[0], opt_trajs)
               loss_tot += loss
               pred_dists = -(outputs[1].sum(dim=(1, 2, 3)) - 1)
@@ -345,7 +356,10 @@ class NeuralAstarModule(pl.LightningModule):
               x = map_designs, start_maps, goal_maps
               outputs = self.forward(x)
               opt_trajs = self.planner.get_opt_trajs(start_maps, goal_maps, opt_policies, self.mechanism, self.device)
-              opt_trajs_ = dilate_opt_trajs(opt_trajs.double(), map_designs.double(), self.mechanism)
+              if self.dilate_gt:
+                  opt_trajs_ = dilate_opt_trajs(opt_trajs.double(), map_designs.double(), self.mechanism)
+              else:
+                  opt_trajs = opt_trajs
               loss = self.loss_fn(outputs[0], opt_trajs)
               loss_tot += loss
               pred_dists = -(outputs[1].sum(dim=(1, 2, 3)) - 1)
@@ -374,18 +388,46 @@ class NeuralAstarModule(pl.LightningModule):
           loss_tot /= masks.shape[1]
           (masks, indices) = masks.max(axis=1)
 
+          
+        
           p_opt, p_suc, p_exp = compute_mean_metrics(
                 pred_dist_maps,
                 rel_exps_maps,
                 opt_dists,
                 masks,
             )
+          
+          print("pred_dist_maps_size", pred_dist_maps.size())
+          print("opt_traj_size", opt_trajs.size())
+                    
+          score = compute_bsmean_cbound(pred_dist_maps, rel_exps_maps, opt_dists, masks)
+          p_opt_bsm = score[0][0]
+          p_opt_lci = score[0][1]
+          p_opt_uci = score[0][2]
+          p_exp_bsm = score[1][0]
+          p_exp_lci = score[1][1]
+          p_exp_uci = score[1][2]
+          hmean_bsm = score[2][0]
+          hmean_lci = score[2][1]
+          hmean_uci = score[2][2]
 
+          
           self.log("test_p_opt", p_opt, prog_bar=True, logger=True)
-          self.log("test_p_suc", p_suc, prog_bar=True, logger=True)
-          self.log("test_p_exp", p_exp, prog_bar=True, logger=True)
+          self.log("test_p_suc_av", p_suc, prog_bar=True, logger=True)
+          self.log("test_p_exp_av", p_exp, prog_bar=True, logger=True)
+          self.log("test_p_opt_bsm", p_opt_bsm, prog_bar=True, logger=True)
+          self.log("test_p_opt_lci", p_opt_lci, prog_bar=True, logger=True)
+          self.log("test_p_opt_uci", p_opt_uci, prog_bar=True, logger=True)
+          self.log("test_p_exp_bsm", p_exp_bsm, prog_bar=True, logger=True)
+          self.log("test_p_exp_lci", p_exp_lci, prog_bar=True, logger=True)
+          self.log("test_p_exp_uci", p_exp_uci, prog_bar=True, logger=True)
+          self.log("test_hmean_bsm", hmean_bsm, prog_bar=True, logger=True)
+          self.log("test_hmean_lci", hmean_lci, prog_bar=True, logger=True)
+          self.log("test_hmean_uci", hmean_uci, prog_bar=True, logger=True)
+
           self.log("test_loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("test_loss" , loss, logger=True)
+
 
   def configure_optimizers(self):
       optimizer = torch.optim.RMSprop(self.planner.model.parameters(), lr=1e-3)

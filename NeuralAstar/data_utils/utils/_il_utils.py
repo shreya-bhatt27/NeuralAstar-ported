@@ -4,6 +4,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
+import bootstrapped.bootstrap as bs
+import bootstrapped.stats_functions as bs_stats
+from metrics import compute_opt_exp, compute_mean_metrics, compute_opt_suc_exp
+import numpy as np
 TEST_RANDOM_SEED = 2020
 NUM_POINTS_PER_MAP = 5
 
@@ -108,3 +112,32 @@ def _sample_onehot(binmaps, device):
     onehots = onehots.reshape(binmaps_n.shape)
     onehots = onehots.bool()
     return onehots
+
+def compute_bsmean_cbound(pred_dists, rel_exps, opt_dists, masks):
+
+    opt1, exp = [], []
+    for i in range(len(pred_dists)):
+        o1, e = compute_opt_exp(pred_dists[i:i + 1], rel_exps[i:i + 1],
+                                opt_dists[i:i + 1], masks[i:i + 1])
+        if (len(o1) > 0):
+            opt1.append(o1.mean())
+            exp.append(np.maximum(1 - e, 0).mean())
+    opt1 = np.array(opt1)
+    exp = np.array(exp)
+    opt1_bounds = bs.bootstrap(
+        opt1, stat_func=bs_stats.mean)  # use subopt score instead of opt
+    exp_bounds = bs.bootstrap(exp, stat_func=bs_stats.mean)
+    EPS = 1e-10
+    hmean_value = 2. / (1. / (opt1 * 1. + EPS) + 1. / (exp + EPS))
+    hmean_bounds = bs.bootstrap(hmean_value, stat_func=bs_stats.mean)
+
+    scores = np.array([
+        [opt1_bounds.value, opt1_bounds.lower_bound, opt1_bounds.upper_bound],
+        [exp_bounds.value, exp_bounds.lower_bound, exp_bounds.upper_bound],
+        [
+            hmean_bounds.value, hmean_bounds.lower_bound,
+            hmean_bounds.upper_bound
+        ],
+    ])
+    return scores
+

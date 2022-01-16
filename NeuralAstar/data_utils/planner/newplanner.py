@@ -33,16 +33,20 @@ class NeuralAstar(nn.Module):
     def __init__(
         self,
         mechanism,
+        g_ratio, 
+        encoder_backbone, 
+        dilate_gt, 
+        encoder_input,
     ):
         super().__init__()
         self.mechanism = mechanism
-        self.encoder_input = 'm+'
+        self.encoder_input = encoder_input
         self.encoder_arch = 'Unet'
-        self.encoder_backbone='vgg16_bn'
+        self.encoder_backbone= encoder_backbone
         self.encoder_depth = 4
         self.ignore_obstacles = True
         self.learn_obstacles = False
-        self.g_ratio = 0.5
+        self.g_ratio = g_ratio
         self.Tmax = 0.25
         self.detach_g = True
         self.astar = DifferentiableAstar(
@@ -68,10 +72,13 @@ class NeuralAstar(nn.Module):
         return histories, paths, pred_cost_maps
 
 class combine_planner():
-    def __init__(self,mechanism):
-        self.model = NeuralAstar(mechanism)
+    def __init__(self,mechanism, g_ratio, encoder_backbone, dilate_gt, encoder_input):
+        self.dilate_gt = dilate_gt
+        self.g_ratio = g_ratio
+        self.encoder_backbone = encoder_backbone
+        self.encoder_input = encoder_input
+        self.model = NeuralAstar(mechanism, self.g_ratio, self.encoder_backbone, self.dilate_gt, self.encoder_input)
         self.mechanism = mechanism
-        self.dilate_gt = True
         self.astar_ref = DifferentiableAstar(self.mechanism, g_ratio=0.5, Tmax=1)
     
     def forward(self, map_designs, start_maps, goal_maps):
