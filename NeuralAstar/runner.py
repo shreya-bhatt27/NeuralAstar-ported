@@ -398,8 +398,12 @@ class NeuralAstarModule(pl.LightningModule):
                 masks,
             )
           
-          print("pred_dist_maps_size", pred_dist_maps.size())
-          print("opt_traj_size", opt_trajs.size())
+          #print("pred_dist_maps_size", pred_dist_maps.size())
+          path_len = pred_dist_maps.sum(dim=(1, 2, 3))
+          path_len_opt = opt_trajs.sum(dim=(1,2,3))
+          path_opt_ratio = path_len_opt/path_len
+          path_opt_ratio = path_opt_ratio.mean()
+          #print("opt_traj_size", opt_trajs.size())
                     
           score = compute_bsmean_cbound(pred_dist_maps, rel_exps_maps, opt_dists, masks)
           p_opt_bsm = score[0][0]
@@ -412,7 +416,7 @@ class NeuralAstarModule(pl.LightningModule):
           hmean_lci = score[2][1]
           hmean_uci = score[2][2]
 
-          
+          self.log("path_opt_ratio", path_opt_ratio, prog_bar=True, logger=True)
           self.log("test_p_opt", p_opt, prog_bar=True, logger=True)
           self.log("test_p_suc_av", p_suc, prog_bar=True, logger=True)
           self.log("test_p_exp_av", p_exp, prog_bar=True, logger=True)
