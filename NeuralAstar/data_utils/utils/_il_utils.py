@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import torch.utils.data as data
 import bootstrapped.bootstrap as bs
 import bootstrapped.stats_functions as bs_stats
-from metrics import compute_opt_exp, compute_mean_metrics, compute_opt_suc_exp
+from data_utils.utils.metrics import compute_opt_exp, compute_mean_metrics, compute_opt_suc_exp
 import numpy as np
 TEST_RANDOM_SEED = 2020
 NUM_POINTS_PER_MAP = 5
