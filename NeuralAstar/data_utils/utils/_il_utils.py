@@ -105,27 +105,40 @@ def get_hard_medium_easy_masks(opt_dists,
         masks_list.append(masks.bool())
     return masks_list
 
-def _sample_onehot(binmaps, device):
-    n_samples = len(binmaps)
-    binmaps_n = binmaps * torch.rand(binmaps.shape, device= device)
+#def _sample_onehot(binmaps, device):
+    #n_samples = len(binmaps)
+    #binmaps_n = binmaps * torch.rand(binmaps.shape, device= device)
     
-    binmaps_vct = binmaps_n.reshape(n_samples, -1)
-    ind = binmaps_vct.argmax(axis=-1)
-    onehots = torch.zeros_like(binmaps_vct)
+    #binmaps_vct = binmaps_n.reshape(n_samples, -1)
+    #ind = binmaps_vct.argmax(axis=-1)
+    #onehots = torch.zeros_like(binmaps_vct)
     #list_here = [od_nan == wall_dist]
     #mask_here = torch.stack(list_here)
     #mask_here = mask_here.bool().squeeze(0)
     #od_nan.masked_fill_(mask_here, torch.tensor(float('nan'), device=device))
     #onehots[range(n_samples), ind] = 1
-    list_here = [range(n_samples), ind]
-    list_tensors = []
-    for not_a_tensor in list_here:
-        list_tensors.append(torch.tensor(not_a_tensor, device = device).bool())    
+    #list_here = [range(n_samples), ind]
+    #list_tensors = []
+    #for not_a_tensor in list_here:
+    #    list_tensors.append(torch.tensor(not_a_tensor, device = device).bool())    
     #mask_here = torch.tensor(list_here, device = device)
-    mask_here = torch.stack(list_tensors)
-    onehots.masked_fill_(mask_here, torch.tensor(1, device=device), device = device)
-    onehots = onehots.reshape(binmaps_n.shape)
-    onehots = onehots.bool()
+    #mask_here = torch.stack(list_tensors)
+    #onehots.masked_fill_(mask_here, torch.tensor(1, device=device), device = device)
+    #onehots = onehots.reshape(binmaps_n.shape)
+    #onehots = onehots.bool()
+    #return onehots
+    
+def _sample_onehot(binmaps, device):
+    binmaps = binmaps.cpu().numpy()
+    n_samples = len(binmaps)
+    binmaps_n = binmaps * np.random.rand(*binmaps.shape)
+
+    binmaps_vct = binmaps_n.reshape(n_samples, -1)
+    ind = binmaps_vct.argmax(axis=-1)
+    onehots = np.zeros_like(binmaps_vct)
+    onehots[range(n_samples), ind] = 1
+    onehots = onehots.reshape(binmaps_n.shape).astype("bool")
+    torch.tensor(onehots, device = device)
     return onehots
 
 def compute_bsmean_cbound(pred_dists, rel_exps, opt_dists, masks):
