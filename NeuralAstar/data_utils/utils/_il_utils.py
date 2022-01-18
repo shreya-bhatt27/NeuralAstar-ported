@@ -120,8 +120,8 @@ def _sample_onehot(binmaps, device):
     list_here = [range(n_samples), ind]
     list_tensors = []
     for not_a_tensor in list_here:
-        list_tensors.append(torch.tensor(not_a_tensor, device = device))    
-    mask_here = torch.tensor(list_here, device = device)
+        list_tensors.append(torch.tensor(not_a_tensor, device = device).bool())    
+    #mask_here = torch.tensor(list_here, device = device)
     mask_here = torch.stack(list_tensors)
     mask_here = mask_here.bool()
     onehots.masked_fill_(mask_here, torch.tensor(1, device=device), device = device)
