@@ -72,10 +72,11 @@ def dilate_opt_trajs(opt_trajs, map_designs, mechanism):
     ot_conv = ot_conv * map_designs
     return ot_conv
 
-def get_hard_medium_easy_masks(opt_dists_CPU,
+def get_hard_medium_easy_masks(opt_dists_CPU: torch.tensor,
+                               device
                                reduce_dim: bool = True,
                                num_points_per_map: int = 5,
-                               device):
+                               ):
     opt_dists_CPU = opt_dists_CPU.cpu().numpy()
     # make sure the selected nodes are random but fixed
     np.random.seed(TEST_RANDOM_SEED)
