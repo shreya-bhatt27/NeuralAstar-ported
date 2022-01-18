@@ -72,37 +72,36 @@ def dilate_opt_trajs(opt_trajs, map_designs, mechanism):
     ot_conv = ot_conv * map_designs
     return ot_conv
 
-def get_hard_medium_easy_masks(opt_dists,
-                               device,
+def get_hard_medium_easy_masks(opt_dists_CPU,
                                reduce_dim: bool = True,
-                               num_points_per_map: int = 5):
-    wall_dist = torch.min(opt_dists)
-    n_samples = opt_dists.shape[0]
-    od_vct = opt_dists.reshape(n_samples, -1)
-    od_nan = od_vct.clone()
-    #od_nan[od_nan == wall_dist] = float('nan')
-    list_here = [od_nan == wall_dist]
-    mask_here = torch.stack(list_here)
-    mask_here = mask_here.bool().squeeze(0)
-    od_nan.masked_fill_(mask_here, torch.tensor(float('nan'), device=device))
-    od_nan = torch.nan_to_num(od_nan)
-    (od_min, indices) = torch.min(od_nan, axis=1, keepdims=True)
-    thes = od_min.matmul(torch.tensor([[1.0, 0.85, 0.70, 0.55]], device=device))
-    thes = thes.int()
-    thes = torch.transpose(thes, 0, 1)
-    thes = thes.reshape(4, n_samples, 1, 1, 1)
-    masks_list = []
+                               num_points_per_map: int = 5,
+                               device):
+    opt_dists_CPU = opt_dists_CPU.cpu().numpy()
+    # make sure the selected nodes are random but fixed
+    np.random.seed(TEST_RANDOM_SEED)
+    # impossible distance
+    wall_dist = np.min(opt_dists_CPU)
 
+    n_samples = opt_dists_CPU.shape[0]
+    od_vct = opt_dists_CPU.reshape(n_samples, -1)
+    od_nan = od_vct.copy()
+    od_nan[od_nan == wall_dist] = np.nan
+    od_min = np.nanmin(od_nan, axis=1, keepdims=True)
+    thes = od_min.dot(np.array([[1.0, 0.85, 0.70, 0.55]])).astype("int").T
+    thes = thes.reshape(4, n_samples, 1, 1, 1)
+
+    masks_list = []
     for i in range(3):
-        binmaps = ((thes[i] <= opt_dists) &
-                   (opt_dists < thes[i + 1])) * 1.0
-        binmaps = torch.repeat_interleave(binmaps, num_points_per_map, 0)
-        masks = _sample_onehot(binmaps, device)
+        binmaps = ((thes[i] <= opt_dists_CPU) &
+                   (opt_dists_CPU < thes[i + 1])) * 1.0
+        binmaps = np.repeat(binmaps, num_points_per_map, 0)
+        masks = _sample_onehot(binmaps)
         masks = masks.reshape(n_samples, num_points_per_map,
-                              *opt_dists.shape[1:])
+                              *opt_dists_CPU.shape[1:])
         if reduce_dim:
-            (masks, indices) = masks.max(axis=1)
-        masks_list.append(masks.bool())
+            masks = masks.max(axis=1)
+        masks_list.append(masks.astype(bool))
+    masks_list = torch.tensor(masks_list, device = device)
     return masks_list
 
 #def _sample_onehot(binmaps, device):
@@ -129,7 +128,6 @@ def get_hard_medium_easy_masks(opt_dists,
     #return onehots
     
 def _sample_onehot(binmaps, device):
-    binmaps = binmaps.cpu().numpy()
     n_samples = len(binmaps)
     binmaps_n = binmaps * np.random.rand(*binmaps.shape)
 
@@ -138,7 +136,6 @@ def _sample_onehot(binmaps, device):
     onehots = np.zeros_like(binmaps_vct)
     onehots[range(n_samples), ind] = 1
     onehots = onehots.reshape(binmaps_n.shape).astype("bool")
-    torch.tensor(onehots, device = device)
     return onehots
 
 def compute_bsmean_cbound(pred_dists, rel_exps, opt_dists, masks):
