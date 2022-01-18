@@ -128,7 +128,7 @@ def get_hard_medium_easy_masks(opt_dists_CPU: torch.tensor,
     #onehots = onehots.bool()
     #return onehots
     
-def _sample_onehot(binmaps, device):
+def _sample_onehot(binmaps):
     n_samples = len(binmaps)
     binmaps_n = binmaps * np.random.rand(*binmaps.shape)
 
