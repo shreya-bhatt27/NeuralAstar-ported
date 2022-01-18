@@ -82,7 +82,7 @@ def get_hard_medium_easy_masks(opt_dists,
     od_nan = od_vct.clone()
     #od_nan[od_nan == wall_dist] = float('nan')
     list_here = [od_nan == wall_dist]
-    mask_here = torch.stack(list_here, device=device)
+    mask_here = torch.stack(list_here)
     mask_here = mask_here.bool()
     od_nan.masked_fill_(mask_here, torch.tensor(float('nan'), device=device))
     od_nan = torch.nan_to_num(od_nan)
