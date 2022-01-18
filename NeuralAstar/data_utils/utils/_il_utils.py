@@ -118,9 +118,9 @@ def _sample_onehot(binmaps, device):
     #od_nan.masked_fill_(mask_here, torch.tensor(float('nan'), device=device))
     #onehots[range(n_samples), ind] = 1
     #list_here = [range(n_samples), ind]
-    mask_here = torch.stack([range(n_samples), ind])
-    mask_here = mask_here.bool().squeeze(0)
-    onehots.masked_fill_(mask_here, 1, device = device)
+    #mask_here = torch.stack([range(n_samples), ind])
+    #mask_here = mask_here.bool().squeeze(0)
+    onehots.masked_fill_([range(n_samples), ind], 1, device = device)
     onehots = onehots.reshape(binmaps_n.shape)
     onehots = onehots.bool()
     return onehots
