@@ -80,7 +80,9 @@ def get_hard_medium_easy_masks(opt_dists,
     n_samples = opt_dists.shape[0]
     od_vct = opt_dists.reshape(n_samples, -1)
     od_nan = od_vct.clone()
-    od_nan[od_nan == wall_dist] = float('nan')
+    #od_nan[od_nan == wall_dist] = float('nan')
+    mask_here = [od_nan == wall_dist]
+    od_nan.masked_fill_(mask_here.cuda(), float('nan'))
     od_nan = torch.nan_to_num(od_nan)
     (od_min, indices) = torch.min(od_nan, axis=1, keepdims=True)
     thes = od_min.matmul(torch.tensor([[1.0, 0.85, 0.70, 0.55]], device=device))
