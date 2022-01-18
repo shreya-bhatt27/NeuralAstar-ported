@@ -112,7 +112,15 @@ def _sample_onehot(binmaps, device):
     binmaps_vct = binmaps_n.reshape(n_samples, -1)
     ind = binmaps_vct.argmax(axis=-1)
     onehots = torch.zeros_like(binmaps_vct)
-    onehots[range(n_samples), ind] = 1
+    #list_here = [od_nan == wall_dist]
+    #mask_here = torch.stack(list_here)
+    #mask_here = mask_here.bool().squeeze(0)
+    #od_nan.masked_fill_(mask_here, torch.tensor(float('nan'), device=device))
+    #onehots[range(n_samples), ind] = 1
+    list_here = [range(n_samples), ind]
+    mask_here = torch.stack(list_here)
+    mask_here = mask_here.bool().squeeze(0)
+    onehots.masked_fill_(mask_here, 1, device = device)
     onehots = onehots.reshape(binmaps_n.shape)
     onehots = onehots.bool()
     return onehots
