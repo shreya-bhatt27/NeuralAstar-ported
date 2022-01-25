@@ -1,4 +1,4 @@
-from data_utils.planner.newplanner import Unet, combine_planner
+from data_utils.planner.newplanner import UnetPlusPlus, combine_planner
 import torch
 import torch.nn as nn
 from data_utils.astar.differentiable_astar import DifferentiableAstar
