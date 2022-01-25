@@ -7,47 +7,44 @@ from data_utils.utils._il_utils import get_hard_medium_easy_masks
 from data_utils.utils._il_utils import _sample_onehot
 
 
-class Unet(nn.Module):
+class UnetPlusPlus(nn.Module):
 
     DECODER_CHANNELS = [256, 128, 64, 32, 16]
 
     def __init__(self, input_dim, encoder_backbone, encoder_depth):
+        print("Hello Unet++ Here !")
         super().__init__()
         decoder_channels = self.DECODER_CHANNELS[:encoder_depth]
-        self.model = smp.Unet(
+        self.model = smp.UnetPlusPlus(
             encoder_name=encoder_backbone,
             encoder_weights=None,
             classes=1,
             in_channels=input_dim,
             encoder_depth=encoder_depth,
             decoder_channels=decoder_channels,
+#             aux_params={"classes" : 1, "dropout" : 0.5},
         )
-
     def forward(self, x, map_designs):
         y = torch.sigmoid(self.model(x))
         if map_designs is not None:
             y = y * map_designs + torch.ones_like(y) * (1 - map_designs)
         return y
-
+    
 class NeuralAstar(nn.Module):
     def __init__(
         self,
-        mechanism,
-        g_ratio, 
-        encoder_backbone, 
-        dilate_gt, 
-        encoder_input,
+        mechanism, config
     ):
         super().__init__()
         self.mechanism = mechanism
-        self.encoder_input = encoder_input
-        self.encoder_arch = 'Unet'
-        self.encoder_backbone= encoder_backbone
-        self.encoder_depth = 4
+        self.encoder_input = config.encoder_input #{m|m+}
+        self.encoder_arch = 'UnetPlusPlus'                      
+        self.encoder_backbone= config.encoder_backbone #{vgg16_bn | resnet18}
+        self.encoder_depth = config.encoder_depth #{4 | 2}  max: 5
         self.ignore_obstacles = True
         self.learn_obstacles = False
-        self.g_ratio = g_ratio
-        self.Tmax = 0.25
+        self.g_ratio = config.g_ratio            #Between [0, 1] as ratio (Default = 0.5)
+        self.Tmax = config.Tmax                  #Must be between (0, 1]
         self.detach_g = True
         self.astar = DifferentiableAstar(
             mechanism=self.mechanism,
@@ -55,7 +52,7 @@ class NeuralAstar(nn.Module):
             Tmax=self.Tmax,
             detach_g=self.detach_g,
         )
-        self.encoder = Unet(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
+        self.encoder = UnetPlusPlus(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
 
     def forward(self, map_designs, start_maps, goal_maps):
         inputs = map_designs
@@ -70,15 +67,53 @@ class NeuralAstar(nn.Module):
                                       obstacles_maps)
 
         return histories, paths, pred_cost_maps
+# class NeuralAstar(nn.Module):
+#     def __init__(
+#         self,
+#         mechanism,
+#         g_ratio, 
+#         encoder_backbone, 
+#         dilate_gt, 
+#         encoder_input,
+#     ):
+#         super().__init__()
+#         self.mechanism = mechanism
+#         self.encoder_input = encoder_input
+#         self.encoder_arch = 'Unet'
+#         self.encoder_backbone= encoder_backbone
+#         self.encoder_depth = 4
+#         self.ignore_obstacles = True
+#         self.learn_obstacles = False
+#         self.g_ratio = g_ratio
+#         self.Tmax = 0.25
+#         self.detach_g = True
+#         self.astar = DifferentiableAstar(
+#             mechanism=self.mechanism,
+#             g_ratio=self.g_ratio,
+#             Tmax=self.Tmax,
+#             detach_g=self.detach_g,
+#         )
+#         self.encoder = Unet(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
+
+#     def forward(self, map_designs, start_maps, goal_maps):
+#         inputs = map_designs
+#         if "+" in self.encoder_input:
+#             inputs = torch.cat((inputs.float(), start_maps.float() + goal_maps.float()), dim=1)
+#         pred_cost_maps = self.encoder(
+#             inputs, map_designs.float() if not self.ignore_obstacles else None)
+#         obstacles_maps = map_designs.float() if not self.learn_obstacles else torch.ones_like(
+#             map_designs)
+
+#         histories, paths = self.astar(pred_cost_maps, start_maps, goal_maps,
+#                                       obstacles_maps)
+
+#         return histories, paths, pred_cost_maps
 
 class combine_planner():
-    def __init__(self,mechanism, g_ratio, encoder_backbone, dilate_gt, encoder_input):
-        self.dilate_gt = dilate_gt
-        self.g_ratio = g_ratio
-        self.encoder_backbone = encoder_backbone
-        self.encoder_input = encoder_input
-        self.model = NeuralAstar(mechanism, self.g_ratio, self.encoder_backbone, self.dilate_gt, self.encoder_input)
+    def __init__(self, mechanism, config):
+        self.model = NeuralAstar(mechanism, config)
         self.mechanism = mechanism
+        self.dilate_gt = True
         self.astar_ref = DifferentiableAstar(self.mechanism, g_ratio=0.5, Tmax=1)
     
     def forward(self, map_designs, start_maps, goal_maps):
@@ -92,15 +127,24 @@ class combine_planner():
 
         for i in range(len(opt_trajs)):
             current_loc = torch.tensor(torch.nonzero(start_maps[i].squeeze()))
+            #print("current_loc: ", current_loc)
             goal_loc = torch.tensor(torch.nonzero(goal_maps[i].squeeze()))
+            #print("goal_loc: ", goal_loc)
             goal_loc = goal_loc.squeeze()
 
             while not (torch.equal(current_loc, goal_loc)):
                 current_loc = current_loc.squeeze()
+                #print(current_loc[0],"...",current_loc[1])
                 opt_trajs[i][0][current_loc[0]][current_loc[1]] = 1.0
+                #print(opt_trajs)
+                #print("opt_trajs", (opt_trajs).size())
+                #print("opt_trajs[i][0][current]:", (opt_trajs[i][0][current_loc[0]][current_loc[1]]).size())
+                #print("opt_trajs[i][0]:",(opt_trajs[i][0]).size())
                 next_loc = mechanism.next_loc(current_loc,
                                             opt_policies[i][0][current_loc[0]][current_loc[1]], device)
                 next_loc = next_loc.squeeze()
+                #print("current_loc", current_loc)
+                #print("next_loc:", next_loc)
 
                 assert (
                     opt_trajs[i][0][next_loc[0]][next_loc[1]].float() == 0.0
@@ -112,7 +156,10 @@ class combine_planner():
 
     def create_start_maps(self, opt_dists, device):
         masks = get_hard_medium_easy_masks(opt_dists, device, reduce_dim=True)
+        #print("mask:", masks)
+        #print("mask_shape", len(masks))
         (masks, indices) = torch.cat(masks, axis=1).max(axis=1, keepdim=True)
+        #print("mask:", masks)
         start_maps = _sample_onehot(masks, device)
         return start_maps
 
