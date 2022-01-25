@@ -113,7 +113,7 @@ class combine_planner():
     def __init__(self, mechanism, config):
         self.model = NeuralAstar(mechanism, config)
         self.mechanism = mechanism
-        self.dilate_gt = True
+        self.dilate_gt = False
         self.astar_ref = DifferentiableAstar(self.mechanism, g_ratio=0.5, Tmax=1)
     
     def forward(self, map_designs, start_maps, goal_maps):
