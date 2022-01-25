@@ -227,6 +227,7 @@ class NeuralAstarModule(pl.LightningModule):
       self.skip_exp_when_training = False
       self.astar_ref = self.planner.astar_ref
       self.output_exp_instead_of_rel_exp = False
+      self.dilate_gt = False
 
   def show_maze(self, image):
       image = image.cpu().detach().numpy().squeeze()
