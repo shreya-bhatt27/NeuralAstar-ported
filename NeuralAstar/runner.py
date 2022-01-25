@@ -220,25 +220,10 @@ class NeuralAstarModule(pl.LightningModule):
 #       self.astar_ref = self.planner.astar_ref
 #       self.output_exp_instead_of_rel_exp = False
   def __init__(self, config):
-      super().__init__()
+      super().__init__()    
       self.mechanism = Moore()
-      self.g_ratio = config.g_ratio
-      self.encoder_input = config.encoder_input #{m|m+}
-#       self.encoder_arch = 'UnetPlusPlus'                      
-      self.encoder_backbone= config.encoder_backbone #{vgg16_bn | resnet18}
-      self.encoder_depth = config.encoder_depth #{4 | 2}  max: 5
-      self.ignore_obstacles = True
-      self.learn_obstacles = False
-#       self.g_ratio = config.g_ratio            #Between [0, 1] as ratio (Default = 0.5)
-      self.Tmax = config.Tmax                  #Must be between (0, 1]
-      self.detach_g = True
-      self.astar = DifferentiableAstar(
-          mechanism=self.mechanism,
-          g_ratio=self.g_ratio,
-          Tmax=self.Tmax,
-          detach_g=self.detach_g,
-      )
-      self.encoder = UnetPlusPlus(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
+      self.planner = combine_planner(self.mechanism, config)
+      self.model = self.planner.model
       self.skip_exp_when_training = False
       self.astar_ref = self.planner.astar_ref
       self.output_exp_instead_of_rel_exp = False
