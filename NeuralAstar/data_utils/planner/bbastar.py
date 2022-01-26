@@ -1,4 +1,4 @@
-from data_utils.planner.newplanner import Unet, combine_planner
+from data_utils.planner.newplanner import UnetPlusPlus, combine_planner
 import torch
 import torch.nn as nn
 from data_utils.astar.differentiable_astar import DifferentiableAstar
@@ -54,7 +54,7 @@ class BBAstar(nn.Module):
         self.encoder_input = 'm+'
         self.encoder_backbone = 'vgg16_bn'
         self.encoder_depth = 4
-        self.encoder = self.encoder = Unet(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
+        self.encoder = self.encoder = UnetPlusPlus(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
         self.ignore_obstacles = True
         self.learn_obstacles = False
         self.bbastar_lambda = 20
