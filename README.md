@@ -1,5 +1,5 @@
 # NeuralAstar-ported
-Pytorch Lightning implementation of Neural Astar planner
+Pytorch Lightning implementation of Neural Astar planner (Unet++ branch)
 
 To create datafiles, run the following commands
 ```
