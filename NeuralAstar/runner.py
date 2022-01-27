@@ -368,6 +368,10 @@ class NeuralAstarModule(pl.LightningModule):
           pred_dist_maps = torch.empty_like(opt_dists)
           pred_dist_maps[:] = float('nan')
           loss_tot = 0.0
+          pred_exps_maps = torch.empty_like(opt_dists)
+          pred_exps_maps[:] = float('nan')
+          exps_maps = torch.empty_like(opt_dists)
+          exps_maps[:] = float('nan')
           rel_exps_maps = torch.empty_like(opt_dists)
           rel_exps_maps[:] = float('nan')
           for i in range(masks.shape[1]):
@@ -401,7 +405,8 @@ class NeuralAstarModule(pl.LightningModule):
 
               if self.output_exp_instead_of_rel_exp:
                   rel_exps = pred_exps
-
+              pred_exps_maps[masks[:, i]] = pred_exps[:]
+              exps_maps[masks[:, i]] = exps[:]
               pred_dist_maps[masks[:, i]] = pred_dists[:]
               rel_exps_maps[masks[:, i]] = rel_exps[:]
           loss_tot /= masks.shape[1]
@@ -409,9 +414,11 @@ class NeuralAstarModule(pl.LightningModule):
 
           
         
-          p_opt, p_suc, p_exp = compute_mean_metrics(
+          p_opt, p_suc, p_exp, num, denom = compute_mean_metrics(
                 pred_dist_maps,
                 rel_exps_maps,
+                pred_exps_maps,
+                exps_maps,
                 opt_dists,
                 masks,
             )
@@ -439,6 +446,8 @@ class NeuralAstarModule(pl.LightningModule):
           hmean_uci = score[2][2]
 
           self.log("path_opt_ratio", path_opt_ratio, prog_bar=True, logger=True)
+          self.log("test NA* exps", num, prog_bar=True, logger=True)
+          self.log("test VA* exps", denom, prog_bar=True, logger=True)
           self.log("test_p_opt", p_opt, prog_bar=True, logger=True)
           self.log("test_p_suc_av", p_suc, prog_bar=True, logger=True)
           self.log("test_p_exp_av", p_exp, prog_bar=True, logger=True)
