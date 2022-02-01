@@ -251,7 +251,7 @@ class NeuralAstarModule(pl.LightningModule):
           opt_trajs_ = dilate_opt_trajs(opt_trajs.double(), map_designs.double(), self.mechanism)
       else:
           opt_trajs = opt_trajs
-      self.show_maze(outputs[2][2][0])   
+      #self.show_maze(outputs[2][2][0])   
       loss = self.loss_fn(outputs[0], opt_trajs)
       self.log("train_loss", loss, prog_bar=True, logger=True)
       return loss
