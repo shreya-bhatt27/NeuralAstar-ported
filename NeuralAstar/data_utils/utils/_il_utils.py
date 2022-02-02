@@ -83,7 +83,7 @@ def get_hard_medium_easy_masks(opt_dists,
     od_nan[od_nan == wall_dist] = float('nan')
     od_nan = torch.nan_to_num(od_nan)
     (od_min, indices) = torch.min(od_nan, axis=1, keepdims=True)
-    torch.tensor([[1.0, 0.85, 0.70, 0.55]], device=device)
+    thes = torch.tensor([[1.0, 0.85, 0.70, 0.55]], device=device)
     thes = od_min.matmul(thes.double())
     thes = thes.int()
     thes = torch.transpose(thes, 0, 1)
