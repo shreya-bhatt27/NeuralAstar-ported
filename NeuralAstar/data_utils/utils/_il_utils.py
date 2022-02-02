@@ -24,7 +24,7 @@ def _st_softmax_noexp(val):
 def expand(x, neighbor_filter, padding=1):
     x = x.unsqueeze(0)
     num_samples = x.shape[1]
-    y = F.conv2d(x, neighbor_filter, padding=padding,
+    y = F.conv2d(x.double(), neighbor_filter, padding=padding,
                  groups=num_samples).squeeze()
     y = y.squeeze(0)
     return y
