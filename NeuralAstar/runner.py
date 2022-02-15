@@ -13,7 +13,7 @@ from data_utils.utils.mechanism import Moore , NorthEastWestSouth
 from data_utils.planner.newplanner import combine_planner
 from data_utils.utils._il_utils import dilate_opt_trajs, get_hard_medium_easy_masks, compute_bsmean_cbound
 from data_utils.utils.metrics import compute_mean_metrics
-from data_utils.planner.bbastar import BBAstarPlanner
+#from data_utils.planner.bbastar import BBAstarPlanner
 from dataloaders import AstarDataModule
 
 class BBAstarModule(pl.LightningModule):
