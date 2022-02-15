@@ -48,14 +48,11 @@ class AstarDataModule(pl.LightningDataModule):
   def setup(self, stage): 
     print("setting up")    
   def train_dataloader(self):
-    #self.setup('train')
     self.train_dataset = MazeDataset(self.datafile, "train")
     return torch.utils.data.DataLoader(self.train_dataset, batch_size=100, shuffle=True, num_workers=2)
   def val_dataloader(self):
-    #self.setup('eval')
     self.val_dataset = MazeDataset(self.datafile, "valid")
     return torch.utils.data.DataLoader(self.val_dataset, batch_size=100, shuffle=False, num_workers=2)
   def test_dataloader(self):
-    #self.setup('test')
     self.test_dataset = MazeDataset(self.datafile, "test")
     return torch.utils.data.DataLoader(self.test_dataset, batch_size=100, shuffle=False, num_workers=2)

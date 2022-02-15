@@ -1,3 +1,9 @@
+"""
+Functions for evaluation for metrics (Opt, Exp, Hmean and their confidence intervals
+and their condfidence intervals)
+Adapted in PyTorch from https://github.com/omron-sinicx/neural-astar
+"""
+
 import torch
 
 def compute_opt_suc_exp(pred_dists, rel_exps, opt_dists, masks):

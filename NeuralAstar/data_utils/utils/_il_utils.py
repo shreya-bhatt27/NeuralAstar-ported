@@ -1,3 +1,8 @@
+"""
+Utility functions for Neural A* planner adapted from https://github.com/omron-sinicx/neural-astar 
+from numpy to torch
+"""
+
 from __future__ import print_function
 import math
 import torch
@@ -8,8 +13,6 @@ import bootstrapped.bootstrap as bs
 import bootstrapped.stats_functions as bs_stats
 from data_utils.utils.metrics import compute_opt_exp, compute_mean_metrics, compute_opt_suc_exp
 import numpy as np
-TEST_RANDOM_SEED = 2020
-NUM_POINTS_PER_MAP = 5
 
 def _st_softmax_noexp(val, device):
     val_ = val.reshape(val.shape[0], -1)
@@ -19,9 +22,7 @@ def _st_softmax_noexp(val, device):
     ind = ind.cpu().numpy()
     y_hard = y_hard.cpu().numpy()
     y_hard[range(len(y_hard)), ind] = 1
-    #y_hard = torch.tensor(y_hard)
     y_hard = torch.tensor(y_hard, device=device)
-    #y_hard = y_hard.cuda()
     y_hard = y_hard.reshape_as(val)
     y = y.reshape_as(val)
     return (y_hard - y).detach() + y
@@ -49,7 +50,6 @@ def backtrack(start_maps, goal_maps, parents, current_t, device):
         path_maps.reshape(num_samples, -1)[range(num_samples), loc] = 1
         loc = parents[range(num_samples), loc]
     path_maps = torch.tensor(path_maps, device=device)
-    #path_maps = path_maps.cuda()
     return path_maps
 
 def get_min(val):
@@ -69,7 +69,6 @@ def sample_onehot(binmaps):
     onehots = torch.zeros_like(binmaps_vct)
     onehots[range(n_samples), ind] = 1
     onehots = onehots.reshape_as(binmaps_n)
-
     return onehots
 
 def dilate_opt_trajs(opt_trajs, map_designs, mechanism):
@@ -129,7 +128,6 @@ def _sample_onehot(binmaps, device):
     return onehots
 
 def compute_bsmean_cbound(pred_dists, rel_exps, opt_dists, masks):
-
     opt1, exp = [], []
     for i in range(len(pred_dists)):
         o1, s, e = compute_opt_suc_exp(pred_dists[i:i + 1], rel_exps[i:i + 1],
@@ -145,7 +143,6 @@ def compute_bsmean_cbound(pred_dists, rel_exps, opt_dists, masks):
     EPS = 1e-10
     hmean_value = 2. / (1. / (opt1 * 1. + EPS) + 1. / (exp + EPS))
     hmean_bounds = bs.bootstrap(hmean_value, stat_func=bs_stats.mean)
-
     scores = np.array([
         [opt1_bounds.value, opt1_bounds.lower_bound, opt1_bounds.upper_bound],
         [exp_bounds.value, exp_bounds.lower_bound, exp_bounds.upper_bound],

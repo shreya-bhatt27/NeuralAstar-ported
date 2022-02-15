@@ -1,3 +1,7 @@
+"""
+Implementation of the Differentiable A* module from https://github.com/omron-sinicx/neural-astar.
+"""
+
 import torch
 import torch.nn as nn
 import math
