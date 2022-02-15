@@ -50,7 +50,6 @@ class NeuralAstar(nn.Module):
         self.g_ratio = g_ratio
         self.Tmax = 0.25
         self.detach_g = True
-        self.device = device
         self.astar = DifferentiableAstar(
             mechanism=self.mechanism,
             g_ratio=self.g_ratio,
