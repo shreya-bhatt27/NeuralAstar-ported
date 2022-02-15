@@ -37,7 +37,6 @@ class NeuralAstar(nn.Module):
         encoder_backbone, 
         dilate_gt, 
         encoder_input,
-        device,
     ):
         super().__init__()
         self.mechanism = mechanism
