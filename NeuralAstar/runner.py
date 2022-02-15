@@ -129,8 +129,6 @@ class BBAstarModule(pl.LightningModule):
           self.log("loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("loss" , loss, logger=True)
           self.log("hmean", hmean, logger=True, prog_bar=True)
-          #trainer.save_checkpoint("recent_bbastar.pth")
-          #wandb.save("recent_bbastar.pth")
             
   def test_step(self, test_batch, batch_idx):
       self.planner.model.eval()
@@ -227,7 +225,7 @@ class NeuralAstarModule(pl.LightningModule):
 
   def forward(self, x):
       map_designs, start_maps, goal_maps = x
-      y = self.planner.forward(map_designs, start_maps, goal_maps)
+      y = self.planner.forward(map_designs, start_maps, goal_maps, self.device)
       return y
 
   def loss_fn(self, input, target):
@@ -328,9 +326,7 @@ class NeuralAstarModule(pl.LightningModule):
           self.log("p_exp", p_exp, prog_bar=True, logger=True)
           self.log("loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("loss" , loss, logger=True)
-          #trainer.save_checkpoint("recent_bbastar.pth")
           self.log("hmean" , hmean, prog_bar=True, logger=True)
-          #wandb.save("recent_bbastar.pth")
             
   def test_step(self, test_batch, batch_idx):
       self.planner.model.eval()
@@ -398,7 +394,6 @@ class NeuralAstarModule(pl.LightningModule):
                 masks,
             )
           
-          #print("pred_dist_maps_size", pred_dist_maps.size())
           path_len = pred_dist_maps.sum(dim=(1, 2, 3))
           print(path_len)
           path_len_opt = opt_trajs.sum(dim=(1,2,3))
@@ -407,8 +402,7 @@ class NeuralAstarModule(pl.LightningModule):
           path_len_opt = torch.nan_to_num(path_len_opt,1)
           path_opt_ratio = torch.div(path_len_opt,path_len)
           path_opt_ratio = path_opt_ratio.mean()
-          #print("opt_traj_size", opt_trajs.size())
-                    
+                   
           score = compute_bsmean_cbound(pred_dist_maps, rel_exps_maps, opt_dists, masks)
           p_opt_bsm = score[0][0]
           p_opt_lci = score[0][1]

@@ -11,7 +11,7 @@ import numpy as np
 TEST_RANDOM_SEED = 2020
 NUM_POINTS_PER_MAP = 5
 
-def _st_softmax_noexp(val):
+def _st_softmax_noexp(val, device):
     val_ = val.reshape(val.shape[0], -1)
     y = val_ / (val_.sum(dim=-1, keepdim=True))
     _, ind = y.max(dim=-1)
@@ -19,8 +19,9 @@ def _st_softmax_noexp(val):
     ind = ind.cpu().numpy()
     y_hard = y_hard.cpu().numpy()
     y_hard[range(len(y_hard)), ind] = 1
-    y_hard = torch.tensor(y_hard)
-    y_hard = y_hard.cuda()
+    #y_hard = torch.tensor(y_hard)
+    y_hard = torch.tensor(y_hard, device=device)
+    #y_hard = y_hard.cuda()
     y_hard = y_hard.reshape_as(val)
     y = y.reshape_as(val)
     return (y_hard - y).detach() + y
@@ -33,7 +34,7 @@ def expand(x, neighbor_filter, padding=1):
     y = y.squeeze(0)
     return y
 
-def backtrack(start_maps, goal_maps, parents, current_t):
+def backtrack(start_maps, goal_maps, parents, current_t, device):
     num_samples = start_maps.shape[0]
     parents = parents.type(torch.long)
     goal_maps = goal_maps.type(torch.long)
@@ -91,16 +92,7 @@ def get_hard_medium_easy_masks(opt_dists,
     od_nan = od_vct.clone()
     mask = [od_nan == wall_dist]
     mask = mask[0]
-    #print(od_nan)
-    #print(mask)
-    #print(~mask)
-    #print(mask)
     od_nan = od_nan.masked_fill_(mask,float('nan'))
-    #a.masked_fill_(mask.cuda(), 1)
-    #mod_nan = (od_nan*(~mask))+ (mask*float('nan'))
-    #od_nan[od_nan == wall_dist] = float('nan')
-    #print(od_nan)
-    #print(mod_nan)
     od_nan = torch.nan_to_num(od_nan)
     (od_min, indices) = torch.min(od_nan, axis=1, keepdims=True)
     thes = torch.tensor([[1.0, 0.85, 0.70, 0.55]], device=device)
@@ -128,18 +120,6 @@ def _sample_onehot(binmaps, device):
     binmaps_vct = binmaps_n.reshape(n_samples, -1)
     ind = binmaps_vct.argmax(axis=-1)
     onehots = torch.zeros_like(binmaps_vct)
-    #scatter_list = range(n_samples)
-    #scatter_list = torch.tensor(scatter_list, device = device)
-    #index = torch.tensor()
-    #scatter_indices = torch.stack((scatter_list, ind))
-    #print(ind)
-    #mask = [range(n_samples), ind]
-    #zipped = zip(range(n_samples), ind)
-    #zipper = torch.tensor(zipped, device = device)
-    #mask = torch.zeros_like(onehots)
-    #mask = mask.scatter_(0, scatter_indices,1)
-    #print(mask)
-    #print(mask.size())
     onehots = onehots.cpu().numpy()
     ind = ind.cpu().numpy()
     onehots[range(n_samples), ind] = 1
