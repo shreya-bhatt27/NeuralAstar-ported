@@ -48,8 +48,8 @@ def backtrack(start_maps, goal_maps, parents, current_t, device):
     for t in range(current_t):
         path_maps.reshape(num_samples, -1)[range(num_samples), loc] = 1
         loc = parents[range(num_samples), loc]
-    path_maps = torch.tensor(path_maps)
-    path_maps = path_maps.cuda()
+    path_maps = torch.tensor(path_maps, device=device)
+    #path_maps = path_maps.cuda()
     return path_maps
 
 def get_min(val):

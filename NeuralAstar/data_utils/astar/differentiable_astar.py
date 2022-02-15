@@ -23,7 +23,7 @@ class DifferentiableAstar(nn.Module):
         self.detach_g = detach_g
         self.verbose = verbose
 
-    def forward(self, cost_maps, start_maps, goal_maps, obstacles_maps):
+    def forward(self, cost_maps, start_maps, goal_maps, obstacles_maps, device):
         assert cost_maps.ndim == 4
         assert start_maps.ndim == 4
         assert goal_maps.ndim == 4
@@ -60,7 +60,7 @@ class DifferentiableAstar(nn.Module):
             f = self.g_ratio * g + (1 - self.g_ratio) * h
             f_exp = torch.exp(-1 * f / math.sqrt(cost_maps.shape[-1]))
             f_exp = f_exp * open_maps
-            selected_node_maps = _st_softmax_noexp(f_exp)
+            selected_node_maps = _st_softmax_noexp(f_exp, device)
 
             # break if arriving at the goal
             dist_to_goal = (selected_node_maps * goal_maps).sum((1, 2),
@@ -102,5 +102,5 @@ class DifferentiableAstar(nn.Module):
             parents = new_parents * idx + parents * (1 - idx)
 
         # backtracking
-        path_maps = backtrack(start_maps, goal_maps, parents, t)
+        path_maps = backtrack(start_maps, goal_maps, parents, t, device)
         return histories.unsqueeze(1), path_maps.unsqueeze(1)

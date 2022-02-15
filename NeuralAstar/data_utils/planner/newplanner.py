@@ -37,6 +37,7 @@ class NeuralAstar(nn.Module):
         encoder_backbone, 
         dilate_gt, 
         encoder_input,
+        device,
     ):
         super().__init__()
         self.mechanism = mechanism
@@ -49,6 +50,7 @@ class NeuralAstar(nn.Module):
         self.g_ratio = g_ratio
         self.Tmax = 0.25
         self.detach_g = True
+        self.device = device
         self.astar = DifferentiableAstar(
             mechanism=self.mechanism,
             g_ratio=self.g_ratio,
@@ -57,7 +59,7 @@ class NeuralAstar(nn.Module):
         )
         self.encoder = Unet(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
 
-    def forward(self, map_designs, start_maps, goal_maps):
+    def forward(self, map_designs, start_maps, goal_maps, device):
         inputs = map_designs
         if "+" in self.encoder_input:
             inputs = torch.cat((inputs.float(), start_maps.float() + goal_maps.float()), dim=1)
@@ -67,7 +69,7 @@ class NeuralAstar(nn.Module):
             map_designs)
 
         histories, paths = self.astar(pred_cost_maps, start_maps, goal_maps,
-                                      obstacles_maps)
+                                      obstacles_maps, device)
 
         return histories, paths, pred_cost_maps
 
@@ -81,8 +83,8 @@ class combine_planner():
         self.mechanism = mechanism
         self.astar_ref = DifferentiableAstar(self.mechanism, g_ratio=0.5, Tmax=1)
     
-    def forward(self, map_designs, start_maps, goal_maps):
-        outputs = self.model.forward(map_designs, start_maps, goal_maps)
+    def forward(self, map_designs, start_maps, goal_maps, device):
+        outputs = self.model.forward(map_designs, start_maps, goal_maps, device)
         return outputs
 
     def get_opt_trajs(self, start_maps, goal_maps, opt_policies, mechanism, device):
