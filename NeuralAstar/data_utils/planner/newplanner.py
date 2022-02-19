@@ -67,48 +67,7 @@ class NeuralAstar(nn.Module):
                                       obstacles_maps)
 
         return histories, paths, pred_cost_maps
-# class NeuralAstar(nn.Module):
-#     def __init__(
-#         self,
-#         mechanism,
-#         g_ratio, 
-#         encoder_backbone, 
-#         dilate_gt, 
-#         encoder_input,
-#     ):
-#         super().__init__()
-#         self.mechanism = mechanism
-#         self.encoder_input = encoder_input
-#         self.encoder_arch = 'Unet'
-#         self.encoder_backbone= encoder_backbone
-#         self.encoder_depth = 4
-#         self.ignore_obstacles = True
-#         self.learn_obstacles = False
-#         self.g_ratio = g_ratio
-#         self.Tmax = 0.25
-#         self.detach_g = True
-#         self.astar = DifferentiableAstar(
-#             mechanism=self.mechanism,
-#             g_ratio=self.g_ratio,
-#             Tmax=self.Tmax,
-#             detach_g=self.detach_g,
-#         )
-#         self.encoder = Unet(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
-
-#     def forward(self, map_designs, start_maps, goal_maps):
-#         inputs = map_designs
-#         if "+" in self.encoder_input:
-#             inputs = torch.cat((inputs.float(), start_maps.float() + goal_maps.float()), dim=1)
-#         pred_cost_maps = self.encoder(
-#             inputs, map_designs.float() if not self.ignore_obstacles else None)
-#         obstacles_maps = map_designs.float() if not self.learn_obstacles else torch.ones_like(
-#             map_designs)
-
-#         histories, paths = self.astar(pred_cost_maps, start_maps, goal_maps,
-#                                       obstacles_maps)
-
-#         return histories, paths, pred_cost_maps
-
+    
 class combine_planner():
     def __init__(self, mechanism, config):
         self.model = NeuralAstar(mechanism, config)
