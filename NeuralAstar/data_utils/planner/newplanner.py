@@ -6,13 +6,11 @@ from data_utils.utils._il_utils import sample_onehot
 from data_utils.utils._il_utils import get_hard_medium_easy_masks
 from data_utils.utils._il_utils import _sample_onehot
 
-
 class UnetPlusPlus(nn.Module):
 
     DECODER_CHANNELS = [256, 128, 64, 32, 16]
 
     def __init__(self, input_dim, encoder_backbone, encoder_depth):
-        print("Hello Unet++ Here !")
         super().__init__()
         decoder_channels = self.DECODER_CHANNELS[:encoder_depth]
         self.model = smp.UnetPlusPlus(
@@ -22,8 +20,7 @@ class UnetPlusPlus(nn.Module):
             in_channels=input_dim,
             encoder_depth=encoder_depth,
             decoder_channels=decoder_channels,
-#             aux_params={"classes" : 1, "dropout" : 0.5},
-        )
+            
     def forward(self, x, map_designs):
         y = torch.sigmoid(self.model(x))
         if map_designs is not None:
@@ -39,12 +36,12 @@ class NeuralAstar(nn.Module):
         self.mechanism = mechanism
         self.encoder_input = config.encoder_input #{m|m+}
         self.encoder_arch = 'UnetPlusPlus'                      
-        self.encoder_backbone= config.encoder_backbone #{vgg16_bn | resnet18}
-        self.encoder_depth = config.encoder_depth #{4 | 2}  max: 5
+        self.encoder_backbone= config.encoder_backbone      #{vgg16_bn | resnet18}
+        self.encoder_depth = config.encoder_depth           #{4 | 2}  max: 5
         self.ignore_obstacles = True
         self.learn_obstacles = False
-        self.g_ratio = config.g_ratio            #Between [0, 1] as ratio (Default = 0.5)
-        self.Tmax = config.Tmax                  #Must be between (0, 1]
+        self.g_ratio = config.g_ratio                       #Between [0, 1] as ratio (Default = 0.5)
+        self.Tmax = config.Tmax                             #Must be between (0, 1]
         self.detach_g = True
         self.astar = DifferentiableAstar(
             mechanism=self.mechanism,
@@ -121,7 +118,3 @@ class combine_planner():
         #print("mask:", masks)
         start_maps = _sample_onehot(masks, device)
         return start_maps
-
-
-
-
