@@ -21,14 +21,18 @@ class Unet(nn.Module):
             in_channels=input_dim,
             encoder_depth=encoder_depth,
             decoder_channels=decoder_channels,
+            aux_params= {"classes" : 1, "dropout" : 0.5}
         )
 
     def forward(self, x, map_designs):
-        y = torch.sigmoid(self.model(x))
+        print("x before is = ", x)
+        x  = torch.stack(tuple(x), dim= 0)
+        a = self.model(x)
+        y = torch.sigmoid(a[0])
         if map_designs is not None:
             y = y * map_designs + torch.ones_like(y) * (1 - map_designs)
         return y
-
+    
 class NeuralAstar(nn.Module):
     def __init__(
         self,
