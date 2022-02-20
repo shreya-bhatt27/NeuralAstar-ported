@@ -112,9 +112,6 @@ class combine_planner():
 
     def create_start_maps(self, opt_dists, device):
         masks = get_hard_medium_easy_masks(opt_dists, device, reduce_dim=True)
-        #print("mask:", masks)
-        #print("mask_shape", len(masks))
         (masks, indices) = torch.cat(masks, axis=1).max(axis=1, keepdim=True)
-        #print("mask:", masks)
         start_maps = _sample_onehot(masks, device)
         return start_maps
