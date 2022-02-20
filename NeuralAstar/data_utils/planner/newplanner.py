@@ -5,29 +5,8 @@ from data_utils.astar.differentiable_astar import DifferentiableAstar
 from data_utils.utils._il_utils import sample_onehot
 from data_utils.utils._il_utils import get_hard_medium_easy_masks
 from data_utils.utils._il_utils import _sample_onehot
-
-
-class Unet(nn.Module):
-
-    DECODER_CHANNELS = [256, 128, 64, 32, 16]
-
-    def __init__(self, input_dim, encoder_backbone, encoder_depth):
-        super().__init__()
-        decoder_channels = self.DECODER_CHANNELS[:encoder_depth]
-        self.model = smp.Unet(
-            encoder_name=encoder_backbone,
-            encoder_weights=None,
-            classes=1,
-            in_channels=input_dim,
-            encoder_depth=encoder_depth,
-            decoder_channels=decoder_channels,
-        )
-
-    def forward(self, x, map_designs):
-        y = torch.sigmoid(self.model(x))
-        if map_designs is not None:
-            y = y * map_designs + torch.ones_like(y) * (1 - map_designs)
-        return y
+!pip install git+https://github.com/Aayush-Jain01/lightning-bolts.git@master --upgrade
+from pl_bolts.models.gans import GAN
 
 class NeuralAstar(nn.Module):
     def __init__(
@@ -41,7 +20,7 @@ class NeuralAstar(nn.Module):
         super().__init__()
         self.mechanism = mechanism
         self.encoder_input = encoder_input
-        self.encoder_arch = 'Unet'
+        self.encoder_arch = 'GAN'
         self.encoder_backbone= encoder_backbone
         self.encoder_depth = 4
         self.ignore_obstacles = True
@@ -55,21 +34,26 @@ class NeuralAstar(nn.Module):
             Tmax=self.Tmax,
             detach_g=self.detach_g,
         )
-        self.encoder = Unet(len(self.encoder_input), self.encoder_backbone, self.encoder_depth)
+        self.encoder = GAN(input_channels=2, input_height=32, input_width=32, latent_dim= 32)
 
-    def forward(self, map_designs, start_maps, goal_maps, device):
+    def forward(self, map_designs, start_maps, goal_maps):
         inputs = map_designs
         if "+" in self.encoder_input:
             inputs = torch.cat((inputs.float(), start_maps.float() + goal_maps.float()), dim=1)
-        pred_cost_maps = self.encoder(
-            inputs, map_designs.float() if not self.ignore_obstacles else None)
+        pred_cost_maps = self.encoder(inputs)
+        
+        pred_cost_maps = torch.sigmoid(pred_cost_maps)
+        
+        if map_designs is not None:
+            pred_cost_maps = pred_cost_maps * map_designs + torch.ones_like(pred_cost_maps) * (1 - map_designs)
+            
         obstacles_maps = map_designs.float() if not self.learn_obstacles else torch.ones_like(
             map_designs)
-
         histories, paths = self.astar(pred_cost_maps, start_maps, goal_maps,
-                                      obstacles_maps, device)
+                                      obstacles_maps)
 
         return histories, paths, pred_cost_maps
+
 
 class combine_planner():
     def __init__(self,mechanism, g_ratio, encoder_backbone, dilate_gt, encoder_input):
@@ -81,8 +65,8 @@ class combine_planner():
         self.mechanism = mechanism
         self.astar_ref = DifferentiableAstar(self.mechanism, g_ratio=0.5, Tmax=1)
     
-    def forward(self, map_designs, start_maps, goal_maps, device):
-        outputs = self.model.forward(map_designs, start_maps, goal_maps, device)
+    def forward(self, map_designs, start_maps, goal_maps):
+        outputs = self.model.forward(map_designs, start_maps, goal_maps)
         return outputs
 
     def get_opt_trajs(self, start_maps, goal_maps, opt_policies, mechanism, device):
@@ -115,7 +99,3 @@ class combine_planner():
         (masks, indices) = torch.cat(masks, axis=1).max(axis=1, keepdim=True)
         start_maps = _sample_onehot(masks, device)
         return start_maps
-
-
-
-
