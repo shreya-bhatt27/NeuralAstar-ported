@@ -30,7 +30,7 @@ class NeuralAstarModule(pl.LightningModule):
       self.model = self.planner.model
       self.skip_exp_when_training = False
       self.astar_ref = self.planner.astar_ref
-      self.output_exp_instead_of_rel_exp = False
+      self.output_exp_instead_of_rel_exp = True
 
 
   def show_maze(self, image):
@@ -40,7 +40,7 @@ class NeuralAstarModule(pl.LightningModule):
 
   def forward(self, x):
       map_designs, start_maps, goal_maps = x
-      y = self.planner.forward(map_designs, start_maps, goal_maps, self.device)
+      y = self.planner.forward(map_designs, start_maps, goal_maps)
       return y
 
   def loss_fn(self, input, target):
@@ -52,6 +52,7 @@ class NeuralAstarModule(pl.LightningModule):
   def training_step(self, train_batch, batch_idx):
       self.planner.model.train()
       map_designs, goal_maps, opt_policies, opt_dists = train_batch
+      print(map_designs[0])
 
       if map_designs.dim() == 3:
                 map_designs = map_designs.unsqueeze(1)
@@ -64,7 +65,8 @@ class NeuralAstarModule(pl.LightningModule):
           opt_trajs_ = dilate_opt_trajs(opt_trajs.double(), map_designs.double(), self.mechanism)
       else:
           opt_trajs = opt_trajs
-      #self.show_maze(outputs[2][2][0])   
+      self.show_maze(map_designs[0])
+      self.show_maze(outputs[2][2][0])   
       loss = self.loss_fn(outputs[0], opt_trajs)
       self.log("train_loss", loss, prog_bar=True, logger=True)
       return loss
@@ -86,13 +88,17 @@ class NeuralAstarModule(pl.LightningModule):
 
           masks = torch.cat(masks, axis=1)
           pred_dist_maps = torch.empty_like(opt_dists)
+          only_exp_neural_maps = torch.empty_like(opt_dists)
+          only_exp_vanilla_maps = torch.empty_like(opt_dists)
           pred_dist_maps[:] = float('nan')
+          only_exp_neural_maps[:] = float('nan')
+          only_exp_vanilla_maps[:] = float('nan')
           loss_tot = 0.0
           rel_exps_maps = torch.empty_like(opt_dists)
           rel_exps_maps[:] = float('nan')
           for i in range(masks.shape[1]):
               start_maps = masks[:, i]
-              x = map_designs, start_maps, goal_maps
+              x = (map_designs, start_maps, goal_maps)
               outputs = self.forward(x)
               opt_trajs = self.planner.get_opt_trajs(start_maps, goal_maps, opt_policies, self.mechanism, self.device)
               if self.dilate_gt:
@@ -119,11 +125,15 @@ class NeuralAstarModule(pl.LightningModule):
                   exps = pred_exps
               rel_exps = pred_exps / exps
 
-              if self.output_exp_instead_of_rel_exp:
-                  rel_exps = pred_exps
+              if True:
+                  only_exp_neural = pred_exps
+                  only_exp_vanilla = exps
 
               pred_dist_maps[masks[:, i]] = pred_dists[:]
               rel_exps_maps[masks[:, i]] = rel_exps[:]
+              #only_exp_neural_maps[masks[:, i]] = only_exp_neural[:]
+              #only_exp_vanilla_maps[masks[:, i]] = only_exp_vanilla[:]
+                
           loss_tot /= masks.shape[1]
           (masks, indices) = masks.max(axis=1)
 
@@ -133,15 +143,31 @@ class NeuralAstarModule(pl.LightningModule):
                 opt_dists,
                 masks,
             )
+          
           p_exp = 1 - p_exp
           hmean = (2*p_opt*p_exp)/(p_opt+p_exp)
+            
+          print(only_exp_vanilla.size())
+          print(only_exp_vanilla)
+          print(only_exp_neural.size())
+          print(only_exp_neural)
+          
+          va_exp = only_exp_vanilla.mean()
+          na_exp = only_exp_neural.mean()
+          exp_diff = only_exp_vanilla - only_exp_neural
+          exp_diff = exp_diff.mean()
 
           self.log("p_opt", p_opt, prog_bar=True, logger=True)
           self.log("p_suc", p_suc, prog_bar=True, logger=True)
           self.log("p_exp", p_exp, prog_bar=True, logger=True)
           self.log("loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("loss" , loss, logger=True)
+          #trainer.save_checkpoint("recent_bbastar.pth")
           self.log("hmean" , hmean, prog_bar=True, logger=True)
+          self.log("Vanilla_Astar_exp", va_exp, prog_bar=True, logger=True)
+          self.log("Neural_Astar_exp", na_exp, prog_bar=True, logger=True)
+          self.log("Diff_mean", exp_diff, prog_bar=True, logger=True)  
+          #wandb.save("recent_bbastar.pth")
             
   def test_step(self, test_batch, batch_idx):
       self.planner.model.eval()
@@ -159,7 +185,12 @@ class NeuralAstarModule(pl.LightningModule):
 
           masks = torch.cat(masks, axis=1)
           pred_dist_maps = torch.empty_like(opt_dists)
+          only_exp_neural_maps = torch.empty_like(opt_dists)
+          only_exp_vanilla_maps = torch.empty_like(opt_dists)
           pred_dist_maps[:] = float('nan')
+          only_exp_neural_maps[:] = float('nan')
+          only_exp_vanilla_maps[:] = float('nan')
+        
           loss_tot = 0.0
           rel_exps_maps = torch.empty_like(opt_dists)
           rel_exps_maps[:] = float('nan')
@@ -192,16 +223,18 @@ class NeuralAstarModule(pl.LightningModule):
                   exps = pred_exps
               rel_exps = pred_exps / exps
 
-              if self.output_exp_instead_of_rel_exp:
-                  rel_exps = pred_exps
+              if True:
+                  only_exp_neural = pred_exps
+                  only_exp_vanilla = exps
 
               pred_dist_maps[masks[:, i]] = pred_dists[:]
               rel_exps_maps[masks[:, i]] = rel_exps[:]
+              only_exp_neural_maps[masks[:, i]] = only_exp_neural[:]
+              only_exp_vanilla_maps[masks[:, i]] = only_exp_vanilla[:]
+                
           loss_tot /= masks.shape[1]
           (masks, indices) = masks.max(axis=1)
-
-          
-        
+     
           p_opt, p_suc, p_exp = compute_mean_metrics(
                 pred_dist_maps,
                 rel_exps_maps,
@@ -209,6 +242,7 @@ class NeuralAstarModule(pl.LightningModule):
                 masks,
             )
           
+          #print("pred_dist_maps_size", pred_dist_maps.size())
           path_len = pred_dist_maps.sum(dim=(1, 2, 3))
           print(path_len)
           path_len_opt = opt_trajs.sum(dim=(1,2,3))
@@ -217,7 +251,9 @@ class NeuralAstarModule(pl.LightningModule):
           path_len_opt = torch.nan_to_num(path_len_opt,1)
           path_opt_ratio = torch.div(path_len_opt,path_len)
           path_opt_ratio = path_opt_ratio.mean()
-                   
+          #print("opt_traj_size", opt_trajs.size())
+
+                    
           score = compute_bsmean_cbound(pred_dist_maps, rel_exps_maps, opt_dists, masks)
           p_opt_bsm = score[0][0]
           p_opt_lci = score[0][1]
@@ -228,6 +264,11 @@ class NeuralAstarModule(pl.LightningModule):
           hmean_bsm = score[2][0]
           hmean_lci = score[2][1]
           hmean_uci = score[2][2]
+            
+          va_exp = only_exp_vanilla.mean()
+          na_exp = only_exp_neural.mean()
+          exp_diff = only_exp_vanilla - only_exp_neural
+          exp_diff = exp_diff.mean()
 
           self.log("path_opt_ratio", path_opt_ratio, prog_bar=True, logger=True)
           self.log("test_p_opt", p_opt, prog_bar=True, logger=True)
@@ -242,7 +283,9 @@ class NeuralAstarModule(pl.LightningModule):
           self.log("test_hmean_bsm", hmean_bsm, prog_bar=True, logger=True)
           self.log("test_hmean_lci", hmean_lci, prog_bar=True, logger=True)
           self.log("test_hmean_uci", hmean_uci, prog_bar=True, logger=True)
-
+          self.log("Vanilla_Astar_exp", va_exp, prog_bar=True, logger=True)
+          self.log("Neural_Astar_exp", na_exp, prog_bar=True, logger=True)
+          self.log("Diff_mean", exp_diff, prog_bar=True, logger=True)
           self.log("test_loss_tot" , loss_tot, prog_bar=True, logger=True)
           self.log("test_loss" , loss, logger=True)
 
