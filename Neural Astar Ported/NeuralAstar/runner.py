@@ -113,7 +113,7 @@ class NeuralAstarModule(pl.LightningModule):
               pred_exps = outputs[0].sum((1, 2, 3))
               if (self.model.training & self.skip_exp_when_training) is not True:
                   astar_outputs = self.astar_ref(map_designs, start_maps,
-                                                 goal_maps, map_designs)
+                                                 goal_maps, map_designs, self.device)
                   exps = astar_outputs[0].sum((1, 2, 3))
               else:
                   exps = pred_exps
@@ -186,7 +186,7 @@ class NeuralAstarModule(pl.LightningModule):
               pred_exps = outputs[0].sum((1, 2, 3))
               if (self.model.training & self.skip_exp_when_training) is not True:
                   astar_outputs = self.astar_ref(map_designs, start_maps,
-                                                 goal_maps, map_designs)
+                                                 goal_maps, map_designs, self.device)
                   exps = astar_outputs[0].sum((1, 2, 3))
               else:
                   exps = pred_exps
