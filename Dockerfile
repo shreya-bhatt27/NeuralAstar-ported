@@ -47,6 +47,7 @@ RUN pip install pycuda && \
 {{ end }}
 
 RUN pip install segmentation_models_pytorch && \
+    pip install subprocess && \
     pip install pytorch_lightning && \
     pip install wandb && \
     pip install bootstrapped && \
