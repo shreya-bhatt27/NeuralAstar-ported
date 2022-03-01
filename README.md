@@ -7,6 +7,8 @@ A problem instance consists of a map (a binary matrix indicating traversable and
 
 We have ported the code from the [original repository](https://github.com/omron-sinicx/neural-astar) in Pytorch to Pytorch Lightning.
 # Usage
+
+1. Dataset Generation
 To create datafiles, run the following commands
 ```
 git clone --recursive https://github.com/omron-sinicx/planning-datasets.git
@@ -19,8 +21,13 @@ sh 1_TiledMP.sh
 sh 2_CSM.sh
 sh 3_SDD.sh
 ```
-
 Alternatively, the data in the 'data' folder of this repository can also be used. 
+
+2. Reproducibility experiments
+
+[![Open In Kaggle](https://www.kaggle.com/aarushbhatt/running-experiment)
+
+
 
 
 # Results
