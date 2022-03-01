@@ -22,17 +22,12 @@ sh 2_CSM.sh
 sh 3_SDD.sh
 ```
 Alternatively, the data in the 'data' folder of this repository can also be used. 
-
-2. Reproducibility experiments
-
-[![Open In Kaggle](https://www.kaggle.com/aarushbhatt/running-experiment)
-
-
-
+The experiments can be recreated by running the notebooks in the run_experiments folder on Kaggle.
 
 # Results
 
 # Acknowledgement
+
 
 
 
