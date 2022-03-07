@@ -32,3 +32,5 @@ def main(whether_wandb, wandb_login):
     if whether_wandb:
         wandb.save("gans.pth")
     trainer.test(model, DataModule.test_dataloader())
+if __name__ == '__main__':
+    main()
