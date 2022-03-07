@@ -24,12 +24,14 @@ def main(whether_wandb, wandb_login):
          mode = 'max',
     )
     pl.utilities.seed.seed_everything(1993, workers = True)
-    print("HELLLLLOOOO")
+    print("HELLLLLOOOO_BEFORE")
     DataModule = AstarDataModule("../../data/mpd/multiple_bugtraps_032_moore_c8.npz")
     model = NeuralAstarModule(0.0, 'vgg16_bn', True, 'm+')
     trainer = pl.Trainer(gpus=1, log_every_n_steps=1,callbacks=[checkpoint_callback], max_epochs=400,logger=logger,num_sanity_val_steps=0,gradient_clip_val=40,weights_summary="full", deterministic=True)
     trainer.fit(model, DataModule)
+    print("HELLLLLOOOO_AFTER")
     trainer.save_checkpoint("dropout.pth")
     if whether_wandb:
         wandb.save("dropout.pth")
     trainer.test(model, DataModule.test_dataloader())
+    print("HELLO_LAST")
