@@ -39,3 +39,9 @@ def main(whether_wandb, wandb_login):
 
 if __name__ == '__main__':
     main()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--whether_wandb', metavar='path', required=True)
+    parser.add_argument('--wandb_login', metavar='path', required=True)
+    args = parser.parse_args()
+    main(workspace=args.workspace)
