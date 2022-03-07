@@ -8,11 +8,13 @@ from pytorch_lightning.loggers import WandbLogger
 import wandb
 import random
 
-def main():
-    subprocess.call('git clone -b main https://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@github.com/shreya-bhatt27/NeuralAstar-ported.git')
-    subprocess.call('git clone https://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@github.com/shreya-bhatt27/dataset_astar.git')
-    subprocess.call('wandb login eb94e0c9d64b72218420c8f40585ec650a663fa4')
-    subprocess.call('cd NeuralAstar')
+def main(whether_wandb, wandb_login):
+    logger = 0
+    if whether_wandb == True:
+        subprocess.call('wandb login '  + str(wandb_login))
+        logger = WandbLogger(project="Neural-astar-dropout-experiment")
+    else:
+        logger = None
     subprocess.call('cd ../')
     subprocess.call('mkdir checkpoints')
     subprocess.call('cd NeuralAstar')
@@ -24,11 +26,11 @@ def main():
          mode = 'max',
     )
     pl.utilities.seed.seed_everything(1993, workers = True)
-    logger = WandbLogger(project="Neural-astar-dropout-experiment")
-    DataModule = AstarDataModule("../dataset_astar/data/mpd/all_064_moore_c16.npz")
+#     logger = WandbLogger(project="Neural-astar-dropout-experiment")
+    DataModule = AstarDataModule("../../data/mpd/multiple_bugtraps_032_moore_c8.npz")
     model = NeuralAstarModule(0.0, 'vgg16_bn', True, 'm+')
     trainer = pl.Trainer(gpus=1, log_every_n_steps=1,callbacks=[checkpoint_callback], max_epochs=400,logger=logger,num_sanity_val_steps=0,gradient_clip_val=40,weights_summary="full", deterministic=True)
-    trainer.fit(model, DataModule)
+    trainer.fit(model, DataModule)qq 
     trainer.save_checkpoint("dropout.pth")
     wandb.save("dropout.pth")
     trainer.test(model, DataModule.test_dataloader())
