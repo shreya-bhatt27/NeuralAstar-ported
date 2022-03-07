@@ -36,3 +36,6 @@ def main(whether_wandb, wandb_login):
         wandb.save("dropout.pth")
     trainer.test(model, DataModule.test_dataloader())
     print("HELLO_LAST")
+
+if __name__ == '__main__':
+    main()
