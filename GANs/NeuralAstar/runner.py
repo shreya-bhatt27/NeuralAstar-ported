@@ -40,7 +40,7 @@ class NeuralAstarModule(pl.LightningModule):
 
   def forward(self, x):
       map_designs, start_maps, goal_maps = x
-      y = self.planner.forward(map_designs, start_maps, goal_maps)
+      y = self.planner.forward(map_designs, start_maps, goal_maps, self.device)
       return y
 
   def loss_fn(self, input, target):
