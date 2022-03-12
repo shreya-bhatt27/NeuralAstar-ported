@@ -10,6 +10,7 @@ We have ported the code from the [original repository](https://github.com/omron-
 1. Use Dockerfile to build the environment we have conducted our experiments in
 
 2. Dataset Generation
+
 To create datafiles, run the following commands
 ```
 git clone --recursive https://github.com/omron-sinicx/planning-datasets.git
@@ -29,7 +30,7 @@ The experiments can be recreated by running the notebooks in the run_experiments
 
 To run the experiments first clone the repository and then navigate to the respective directories and run the file named run<exp_name>.py
 
-For Example to run the Dropout experiment
+Example: To run the Dropout experiment
 ```
 git clone https://github.com/shreya-bhatt27/NeuralAstar-ported.git
 cd /Dropout/NeuralAstar
