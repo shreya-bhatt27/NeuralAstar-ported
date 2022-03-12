@@ -7,8 +7,9 @@ A problem instance consists of a map (a binary matrix indicating traversable and
 
 We have ported the code from the [original repository](https://github.com/omron-sinicx/neural-astar) in Pytorch to Pytorch Lightning.
 # Usage
+1. Use Dockerfile to build the environment we have conducted our experiments in
 
-1. Dataset Generation
+2. Dataset Generation
 To create datafiles, run the following commands
 ```
 git clone --recursive https://github.com/omron-sinicx/planning-datasets.git
@@ -24,6 +25,17 @@ sh 3_SDD.sh
 Alternatively, the data in the 'data' folder of this repository can also be used. 
 The experiments can be recreated by running the notebooks in the run_experiments folder on Kaggle.
 
+3.Run Instructions
+
+To run the experiments first clone the repository and then navigate to the respective directories and run the file named run<exp_name>.py
+
+For Example to run the Dropout experiment
+```
+git clone https://github.com/shreya-bhatt27/NeuralAstar-ported.git
+cd /Dropout/NeuralAstar
+python3 rundroput.py
+
+```
 # Results
 
 # Acknowledgement
