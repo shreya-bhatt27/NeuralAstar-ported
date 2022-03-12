@@ -7,9 +7,9 @@ A problem instance consists of a map (a binary matrix indicating traversable and
 
 We have ported the code from the [original repository](https://github.com/omron-sinicx/neural-astar) in Pytorch to Pytorch Lightning.
 # Usage
-1. Use Dockerfile to build the environment we have conducted our experiments in
+1.Use Dockerfile to build the environment we have conducted our experiments in
 
-2. Dataset Generation
+2.Dataset Generation
 
 To create datafiles, run the following commands
 ```
