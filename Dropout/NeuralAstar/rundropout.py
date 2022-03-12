@@ -9,7 +9,6 @@ import wandb
 import random
 
 def main():
-    print("HELLOOO FIRST")
     logger = None
 #     if whether_wandb == True:
 #         subprocess.call('wandb login '  + str(wandb_login))
