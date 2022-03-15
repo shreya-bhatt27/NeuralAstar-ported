@@ -30,11 +30,11 @@ The experiments can be recreated by running the notebooks in the run_experiments
 
 To run the experiments first clone the repository and then navigate to the respective directories and run the file named run<exp_name>.py
 
-Example: To run the Dropout experiment
+Example: To run the GANS experiment
 ```
 git clone https://github.com/shreya-bhatt27/NeuralAstar-ported.git
-cd Dropout/NeuralAstar
-python3 rundroput.py
+cd GANs/NeuralAstar
+python3 rungans.py
 ```
 # Results
 
