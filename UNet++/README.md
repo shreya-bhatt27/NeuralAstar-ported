@@ -7,7 +7,7 @@ A problem instance consists of a map (a binary matrix indicating traversable and
 
 We have ported the code from the [original repository](https://github.com/omron-sinicx/neural-astar) in Pytorch to Pytorch Lightning.
 # Usage
-1.Use Dockerfile to build the environment we have conducted our experiments in
+1.Use Dockerfile to build the environment we have conducted our experiments in.
 
 2.Dataset Generation
 
@@ -30,11 +30,11 @@ The experiments can be recreated by running the notebooks in the run_experiments
 
 To run the experiments first clone the repository and then navigate to the respective directories and run the file named run<exp_name>.py
 
-Example: To run the Dropout experiment
+Example: To run the UNet++ experiment
 ```
 git clone https://github.com/shreya-bhatt27/NeuralAstar-ported.git
-cd Dropout/NeuralAstar
-python3 rundroput.py
+cd UNet++/NeuralAstar
+python3 runUnet++.py
 ```
 # Results
 
