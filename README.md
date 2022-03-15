@@ -35,7 +35,6 @@ Example: To run the Dropout experiment
 git clone https://github.com/shreya-bhatt27/NeuralAstar-ported.git
 cd /Dropout/NeuralAstar
 python3 rundroput.py
-
 ```
 # Results
 
