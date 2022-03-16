@@ -37,7 +37,7 @@ To install the required dependencies,
 !pip install bootstrapped
 !pip install urllib3
 ```
-Example: To run the Dropout experiment
+Example: To run the Neural Astat Portd Code
 ```
 !git clone https://github.com/Alrash/clone-anonymous4open
 %cd clone-anonymous4open
