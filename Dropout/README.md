@@ -47,6 +47,7 @@ Example: To run the Dropout experiment
     
 !ls ../clone-anonymous4open/Neural_Astar_Ported/
 %cd ../clone-anonymous4open/Neural_Astar_Ported/NeuralAstar
+
 cd Dropout/NeuralAstar
 python3 rundroput.py
 ```
