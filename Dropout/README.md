@@ -28,11 +28,25 @@ The experiments can be recreated by running the notebooks in the run_experiments
 
 3.Run Instructions
 
-To run the experiments first clone the repository and then navigate to the respective directories and run the file named run<exp_name>.py
-
+To run the experiments first clone the repository and then navigate to the respective directories and run the following lines of code. To run a particular experiment, run the file named run<exp_name>.py
+To install the required dependencies,
+```
+!pip install segmentation_models_pytorch
+!pip install pytorch_lightning
+!pip install wandb
+!pip install bootstrapped
+!pip install urllib3
+```
 Example: To run the Dropout experiment
 ```
-git clone https://github.com/shreya-bhatt27/NeuralAstar-ported.git
+!git clone https://github.com/Alrash/clone-anonymous4open
+%cd clone-anonymous4open
+
+#cloning our Neural A* implementation
+!python pull.py --dir . --target https://anonymous.4open.science/r/NeuralAstar-ported-6EB0
+    
+!ls ../clone-anonymous4open/Neural_Astar_Ported/
+%cd ../clone-anonymous4open/Neural_Astar_Ported/NeuralAstar
 cd Dropout/NeuralAstar
 python3 rundroput.py
 ```
