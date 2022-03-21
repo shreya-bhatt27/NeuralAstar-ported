@@ -50,4 +50,3 @@ Example: To run the Neural Astat Portd Code
 
 python3 runneuralastarported.py
 ```
-# Acknowledgement
