@@ -45,12 +45,8 @@ Example: To run the UNet++ experiment
 #cloning our Neural A* implementation
 !python pull.py --dir . --target https://anonymous.4open.science/r/NeuralAstar-ported-6EB0
     
-!ls ../clone-anonymous4open/Neural_Astar_Ported/
-%cd ../clone-anonymous4open/Neural_Astar_Ported/NeuralAstar
+!ls ../clone-anonymous4open/UNet++/
+%cd ../clone-anonymous4open/UNet++/NeuralAstar
 
-cd UNet++/NeuralAstar
 python3 runUnet++.py
 ```
-# Results
-
-# Acknowledgement
