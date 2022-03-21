@@ -45,12 +45,9 @@ Example: To run the GANs experiment
 #cloning our Neural A* implementation
 !python pull.py --dir . --target https://anonymous.4open.science/r/NeuralAstar-ported-6EB0
     
-!ls ../clone-anonymous4open/Neural_Astar_Ported/
-%cd ../clone-anonymous4open/Neural_Astar_Ported/NeuralAstar
+!ls ../clone-anonymous4open/GANs/
+%cd ../clone-anonymous4open/GANs/NeuralAstar
 
-cd GANs/NeuralAstar
 python3 rungans.py
 ```
-# Results
-
 # Acknowledgement
