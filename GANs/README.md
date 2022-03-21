@@ -50,4 +50,3 @@ Example: To run the GANs experiment
 
 python3 rungans.py
 ```
-# Acknowledgement
