@@ -45,7 +45,6 @@ RUN pip install pycuda && \
     pip install nnabla-ext-cuda$CUDA_MAJOR_VERSION$CUDA_MINOR_VERSION && \
     /tmp/clean-layer.sh
 {{ end }}
-
 RUN pip install segmentation_models_pytorch && \
     pip install timm && \
     pip install subprocess && \
@@ -54,6 +53,7 @@ RUN pip install segmentation_models_pytorch && \
     pip install bootstrapped && \
     pip install numpy && \
     pip install matplotlib && \
+    pip install urllib3 && \
     pip install ipympl==0.7.0 && \
     /tmp/clean-layer.sh
 
