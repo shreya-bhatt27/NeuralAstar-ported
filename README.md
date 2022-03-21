@@ -45,11 +45,10 @@ Example: To run the Dropout experiment
 #cloning our Neural A* implementation
 !python pull.py --dir . --target https://anonymous.4open.science/r/NeuralAstar-ported-6EB0
     
-!ls ../clone-anonymous4open/Neural_Astar_Ported/
-%cd ../clone-anonymous4open/Neural_Astar_Ported/NeuralAstar
+!ls ../clone-anonymous4open/Dropout/
+%cd ../clone-anonymous4open/Dropout/NeuralAstar
 
-cd Dropout/NeuralAstar
-python3 rundroput.py
+python3 rundropout.py
 ```
 # Results
 
