@@ -48,9 +48,6 @@ Example: To run the Neural Astat Portd Code
 !ls ../clone-anonymous4open/Neural_Astar_Ported/
 %cd ../clone-anonymous4open/Neural_Astar_Ported/NeuralAstar
 
-cd Neural_Astar_Ported/NeuralAstar
 python3 runneuralastarported.py
 ```
-# Results
-
 # Acknowledgement
