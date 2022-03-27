@@ -50,9 +50,3 @@ Example: To run the Dropout experiment
 
 python3 rundropout.py
 ```
-# Acknowledgement
-
-
-
-
-
